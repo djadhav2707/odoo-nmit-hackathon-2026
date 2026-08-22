@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dayflow HRMS — Hackathon Presentation Pitch Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wine-dark: #3D0F27;
+    --wine: #5E1638;
+    --wine-mid: #8C2D5B;
+    --rose: #C93368;
+    --rose-dark: #A8265A;
+    --rose-light: #FBEAF1;
+    --gold: #C6A15B;
+    --gold-light: #F6EEDC;
+    --blush: #F7DCE9;
+    --canvas: #FDF6F9;
+    --surface: #FFFFFF;
+    --ink: #2A1420;
+    --ink-soft: #8A6572;
+    --ink-faint: #C9AEB8;
+    --border: #F0DCE6;
+    --success: #1E9E76;
+    --success-light: #E1F6EE;
+    --danger: #D6483F;
+    --danger-light: #FBE7E5;
+    --shadow-lg: 0 20px 50px rgba(62,15,39,0.18);
+    --shadow-sm: 0 4px 16px rgba(62,15,39,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #190913;
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display { font-family: 'Fraunces', serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  /* SLIDE CONTAINER */
+  .deck-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: 1100px;
+    height: 640px;
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    padding: 40px 48px;
+    overflow-y: auto;
+    position: relative;
+    animation: slideIn .35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .slide.active { display: flex; flex-direction: column; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(12px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* SLIDE HEADER & FOOTER */
+  .slide-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 1.5px solid var(--border); padding-bottom: 14px; }
+  .slide-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: var(--wine-dark); }
+  .slide-sub { font-size: 13.5px; color: var(--ink-soft); margin-top: 3px; }
+  .slide-tag { font-size: 11px; font-weight: 700; background: var(--rose-light); color: var(--rose-dark); padding: 4px 12px; border-radius: 100px; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* NAVIGATION CONTROLS */
+  .deck-nav {
+    height: 64px;
+    background: var(--wine-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .nav-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--rose); border-color: var(--rose); }
+  .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .slide-counter { color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 600; font-family: 'IBM Plex Mono', monospace; }
+
+  /* CARDS & GRIDS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  .feature-card {
+    background: var(--canvas);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+  }
+  .feature-card h4 { font-family: 'Fraunces', serif; font-size: 15px; color: var(--wine-dark); margin-bottom: 6px; }
+  .feature-card p { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+  .screen-mock {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .screen-mock-header {
+    display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  }
+  .screen-mock-title { font-weight: 700; font-size: 12px; color: var(--wine-mid); }
+  .mock-item { font-size: 11px; padding: 6px 10px; background: var(--canvas); border-radius: 6px; color: var(--ink); }
+
+  .badge-pill { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
+  .b-wine { background: var(--blush); color: var(--wine-dark); }
+  .b-rose { background: var(--rose-light); color: var(--rose-dark); }
+  .b-gold { background: var(--gold-light); color: var(--gold); }
+  .b-green { background: var(--success-light); color: var(--success); }
+
+  /* SPEAKER NOTES */
+  .speaker-notes {
+    margin-top: auto;
+    padding: 12px 16px;
+    background: #FFF8FA;
+    border-left: 4px solid var(--rose);
+    border-radius: 0 10px 10px 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .speaker-notes strong { color: var(--rose-dark); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div class="deck-container">
+
+  <!-- ================= SLIDE 1: COVER ================= -->
+  <div class="slide active">
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; background: radial-gradient(circle at center, var(--rose-light) 0%, transparent 60%);">
+      <div style="width:64px; height:64px; border-radius:18px; background:linear-gradient(135deg, var(--wine-dark), var(--rose)); color:#fff; display:flex; align-items:center; justify-content:center; margin-bottom:20px; box-shadow:0 10px 24px rgba(201,51,104,0.3);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="badge-pill b-rose" style="margin-bottom:12px; font-size:12px; padding:4px 14px;">Odoo NMIT Hackathon 2026</span>
+      <h1 class="display" style="font-size:42px; font-weight:700; color:var(--wine-dark); margin-bottom:12px; line-height:1.15;">
+        Dayflow HRMS
+      </h1>
+      <p style="font-size:16px; color:var(--ink-soft); max-width:620px; line-height:1.6; margin-bottom:28px;">
+        Every workday, in flow. A unified, human-centric Human Resource Management System with role-based governance, live attendance punch, instant leave workflows &amp; automated payroll.
+      </p>
+      <div style="display:flex; gap:12px; font-size:12.5px; color:var(--ink-faint);">
+        <span>Team: <strong>Netizens</strong></span> &bull;
+        <span>Track: <strong>Full-Stack Enterprise Web App</strong></span> &bull;
+        <span>Tech: <strong>React &bull; Node.js &bull; Express &bull; MongoDB</strong></span>
+      </div>
+    </div>
+    <div class="speaker-notes">
+      <strong>Speaker Notes (Pitch Opener):</strong>
+      "Good morning judges! Today we present Dayflow HRMS — an enterprise-grade, role-secured human resources platform designed to eliminate workplace friction. Built with a unified design system and complete full-stack integration."
+    </div>
+  </div>
+
+  <!-- ================= SLIDE 2: PROBLEM & SOLUTION ================= -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <h2 class="slide-title">The Challenge &amp; Our Solution</h2>
+        <p class="slide-sub">Bridging the gap between employee empowerment and administrative control</p>
+      </div>
+      <span class="slide-tag">Problem vs Solution</span>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:18px;">
+      <div class="feature-card" style="background:#FFF5F5; border-color:#FED7D7;">
+        <h4 style="color:var(--danger); font-size:16px;">❌ Traditional HR Inefficiencies</h4>
+        <ul style="font-size:12.5px; color:var(--ink-soft); line-height:1.7; padding-left:18px; margin-top:8px;">
+          <li>Fragmented portals causing attendance discrepancies.</li>
+          <li>Slow, manual email-based leave request approval chains.</li>
+          <li>Opaque payroll calculations and delayed salary slip delivery.</li>
+          <li>Vulnerable security without strict single-admin governance.</li>
+        </ul>
+      </div>
+
+      <div class="feature-card" style="background:#F2FBF7; border-color:#C6F6D5;">
+        <h4 style="color:var(--success); font-size:16px;">✅ The Dayflow Advantage</h4>
+        <ul style="font-size:12.5px; color:var(--ink-soft); line-height:1.7; padding-left:18px; margin-top:8px;">
+          <li><strong>Real-time 1-Click Punch:</strong> Instant check-in/out tracking with effective working hours.</li>
+          <li><strong>Interactive Leave Queue:</strong> Instant manager approval/rejection with real-time balance update.</li>
+          <li><strong>Automated Payroll Engine:</strong> Transparent CTC, HRA, PF &amp; tax deduction receipts.</li>
+          <li><strong>Role-Guarded Architecture:</strong> Strict <code>ADMIN001</code> gatekeeping with zero employee escalation.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="feature-card">
+        <h4>🔐 100% Secure Auth</h4>
+        <p>4-step OTP account recovery &amp; strict single-admin credential validation.</p>
+      </div>
+      <div class="feature-card">
+        <h4>⚡ Live Real-Time Sync</h4>
+        <p>New employee onboarding reflects across the portal instantly.</p>
+      </div>
+      <div class="feature-card">
+        <h4>🎨 Unified Design Tokens</h4>
+        <p>Human-centric Wine/Rose palette with Fraunces serif branding.</p>
+      </div>
+    </div>
+
+    <div class="speaker-notes">
+      <strong>Speaker Notes:</strong>
+      "Most enterprise HR systems are clunky. Dayflow solves this with two dedicated perspectives: an effortless daily portal for employees, and a high-command control console for HR Administrators."
+    </div>
+  </div>
+
+  <!-- ================= SLIDE 3: DESIGN SYSTEM & ARCHITECTURE ================= -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <h2 class="slide-title">Unified Design System &amp; Architecture</h2>
+        <p class="slide-sub">Harmonized typography, consistent color tokens &amp; reactive state flow</p>
+      </div>
+      <span class="slide-tag">Design &amp; Architecture</span>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="feature-card">
+        <h4>🎨 Dayflow Design System Tokens</h4>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+          <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+            <div style="width:24px; height:24px; border-radius:6px; background:#3D0F27;"></div>
+            <span><strong>--wine-dark (#3D0F27)</strong>: Dominant Brand &amp; Sidebar Header</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+            <div style="width:24px; height:24px; border-radius:6px; background:#C93368;"></div>
+            <span><strong>--rose (#C93368)</strong>: Primary CTA Buttons &amp; Active Indicators</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+            <div style="width:24px; height:24px; border-radius:6px; background:#C6A15B;"></div>
+            <span><strong>--gold (#C6A15B)</strong>: Warnings, Late Shifts &amp; Pro Highlights</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+            <div style="width:24px; height:24px; border-radius:6px; background:#1E9E76;"></div>
+            <span><strong>--success (#1E9E76)</strong>: Present Status &amp; Approved Requests</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <h4>🏗️ Full-Stack System Architecture</h4>
+        <div style="font-size:12px; color:var(--ink-soft); line-height:1.6; margin-top:8px;">
+          <div style="padding:8px 12px; background:#fff; border-radius:8px; border:1px solid var(--border); margin-bottom:6px;">
+            <strong>React 19 Frontend + Vite:</strong> Componentized layouts, stateful punch clock, dynamic avatars.
+          </div>
+          <div style="padding:8px 12px; background:#fff; border-radius:8px; border:1px solid var(--border); margin-bottom:6px;">
+            <strong>Vite Proxy &amp; Express 5:</strong> Zero-CORS routing to <code>/api/*</code> and <code>/employees</code> endpoints.
+          </div>
+          <div style="padding:8px 12px; background:#fff; border-radius:8px; border:1px solid var(--border);">
+            <strong>MongoDB Atlas + Memory Fallback:</strong> Live data persistence with demo resilience.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="speaker-notes">
+      <strong>Speaker Notes:</strong>
+      "Notice our cohesive color palette. Every button, badge, and chart follows a strict token hierarchy, making the UI instantly recognizable and easy on the eyes during an 8-hour workday."
+    </div>
+  </div>
+
+  <!-- ================= SLIDE 4: AUTHENTICATION SCREENS ================= -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <h2 class="slide-title">1. Authentication &amp; Password Recovery Suite</h2>
+        <p class="slide-sub">4 integrated screens: Sign In, Live Employee Registration, OTP &amp; Reset Password</p>
+      </div>
+      <span class="slide-tag">Auth Screens (4)</span>
+    </div>
+
+    <div class="grid-4">
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">1. Sign In</span>
+          <span class="badge-pill b-wine">Auth</span>
+        </div>
+        <div class="mock-item">Role Selection Toggle</div>
+        <div class="mock-item">Email &amp; Password Inputs</div>
+        <div class="mock-item">Forgot Password trigger</div>
+        <p style="font-size:11px; color:var(--ink-soft);">Strict validation separates regular employees from ADMIN001.</p>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">2. Sign Up</span>
+          <span class="badge-pill b-rose">New Hire</span>
+        </div>
+        <div class="mock-item">Full Name &amp; Work Email</div>
+        <div class="mock-item">Department Dropdown</div>
+        <div class="mock-item">Designation Input</div>
+        <p style="font-size:11px; color:var(--ink-soft);">Immediately registers new hire and updates live directory.</p>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">3. OTP Verify</span>
+          <span class="badge-pill b-gold">Recovery</span>
+        </div>
+        <div class="mock-item">6-Digit Auto-Focus Boxes</div>
+        <div class="mock-item">02:00 Countdown Timer</div>
+        <div class="mock-item">Resend Code action</div>
+        <p style="font-size:11px; color:var(--ink-soft);">Simulates 2FA / email code verification security.</p>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">4. Reset &amp; Done</span>
+          <span class="badge-pill b-green">Success</span>
+        </div>
+        <div class="mock-item">New Password Input</div>
+        <div class="mock-item">Mismatch Validation</div>
+        <div class="mock-item">Success Confirmation</div>
+        <p style="font-size:11px; color:var(--ink-soft);">One-click redirection back to sign in with new credentials.</p>
+      </div>
+    </div>
+
+    <div class="speaker-notes">
+      <strong>Speaker Notes:</strong>
+      "Our auth suite covers both the onboarding and recovery lifecycle. New employee signups immediately flow into the database without requiring server restarts."
+    </div>
+  </div>
+
+  <!-- ================= SLIDE 5: EMPLOYEE PORTAL ================= -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <h2 class="slide-title">2. Employee Workspace (7 Screens)</h2>
+        <p class="slide-sub">Empowering staff with self-service attendance, leaves, and financial visibility</p>
+      </div>
+      <span class="slide-tag">Employee Portal (7)</span>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:14px;">
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Overview &amp; Punch Clock</span>
+          <span class="badge-pill b-wine">Daily Hub</span>
+        </div>
+        <div class="mock-item">Personalized "Good Morning" greeting</div>
+        <div class="mock-item">1-Click Check In / Check Out toggle</div>
+        <div class="mock-item">Live Effective Hours timer (5.4 hrs)</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">My Profile &amp; Documents</span>
+          <span class="badge-pill b-rose">Profile</span>
+        </div>
+        <div class="mock-item">Avatar with initials generator</div>
+        <div class="mock-item">Personal &amp; Job information grid</div>
+        <div class="mock-item">Verified contract download links</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Attendance Shift Log</span>
+          <span class="badge-pill b-green">Log</span>
+        </div>
+        <div class="mock-item">Monthly check-in / check-out history</div>
+        <div class="mock-item">Present / Late status indicators</div>
+        <div class="mock-item">Effective shift duration metrics</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Apply for Time Off</span>
+          <span class="badge-pill b-gold">Apply</span>
+        </div>
+        <div class="mock-item">Annual / Casual / Sick balances</div>
+        <div class="mock-item">Start &amp; End date range picker</div>
+        <div class="mock-item">Instant toast alert on submission</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Leave History</span>
+          <span class="badge-pill b-wine">History</span>
+        </div>
+        <div class="mock-item">Real-time status badges (Pending/Approved)</div>
+        <div class="mock-item">Reason text and duration summary</div>
+        <div class="mock-item">Cancel pending request action</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Salary Slips &amp; Tax</span>
+          <span class="badge-pill b-green">Payroll</span>
+        </div>
+        <div class="mock-item">Monthly gross, deductions &amp; net pay</div>
+        <div class="mock-item">Earnings vs Statutory PF/TDS table</div>
+        <div class="mock-item">One-click PDF Payslip download</div>
+      </div>
+    </div>
+
+    <div class="speaker-notes">
+      <strong>Speaker Notes:</strong>
+      "Employees have everything at their fingertips — punching in takes less than a second, and they can check their remaining leave balance and payslips without emailing HR."
+    </div>
+  </div>
+
+  <!-- ================= SLIDE 6: ADMIN PORTAL ================= -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <h2 class="slide-title">3. Admin Control Console (7 Screens)</h2>
+        <p class="slide-sub">Restricted strictly to <code>ADMIN001</code> for workforce governance &amp; compliance</p>
+      </div>
+      <span class="slide-tag">Admin Console (7)</span>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:14px;">
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Admin Dashboard</span>
+          <span class="badge-pill b-wine">Analytics</span>
+        </div>
+        <div class="mock-item">Headcount (248), Present (219), Pending (4)</div>
+        <div class="mock-item">Live organization event feed</div>
+        <div class="mock-item">Quick action buttons for fast workflows</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Employee Hub + Modal</span>
+          <span class="badge-pill b-rose">Workforce</span>
+        </div>
+        <div class="mock-item">Instant search with substring highlighting</div>
+        <div class="mock-item">Department filter &amp; employee cards</div>
+        <div class="mock-item">Popup Modal to onboard new staff</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Employee Details View</span>
+          <span class="badge-pill b-gold">Deep-Dive</span>
+        </div>
+        <div class="mock-item">Full profile, manager &amp; contact info</div>
+        <div class="mock-item">Salary package &amp; CTC breakdown</div>
+        <div class="mock-item">Admin reset password &amp; deactivation</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Attendance Hub</span>
+          <span class="badge-pill b-green">Attendance</span>
+        </div>
+        <div class="mock-item">Real-time daily workforce check-in list</div>
+        <div class="mock-item">Inline status override modal</div>
+        <div class="mock-item">CSV Export functionality</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Leave Approvals Queue</span>
+          <span class="badge-pill b-wine">Approvals</span>
+        </div>
+        <div class="mock-item">Pending time-off requests with reasons</div>
+        <div class="mock-item">Instant 1-Click Approve / Reject</div>
+        <div class="mock-item">Live badge counter deduction</div>
+      </div>
+
+      <div class="screen-mock">
+        <div class="screen-mock-header">
+          <span class="screen-mock-title">Payroll Console &amp; Reports</span>
+          <span class="badge-pill b-rose">Finance</span>
+        </div>
+        <div class="mock-item">Monthly payroll run trigger (₹14.2L)</div>
+        <div class="mock-item">Statutory compliance register</div>
+        <div class="mock-item">Downloadable PDF &amp; Excel audits</div>
+      </div>
+    </div>
+
+    <div class="speaker-notes">
+      <strong>Speaker Notes:</strong>
+      "Admin features are protected by strict role guards. An administrator can review leaves, override incorrect attendance, and disburse monthly payroll in seconds."
+    </div>
+  </div>
+
+  <!-- ================= SLIDE 7: LIVE DEMO & KEY HIGHLIGHTS ================= -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <h2 class="slide-title">4. Live Demonstration &amp; Hackathon Highlights</h2>
+        <p class="slide-sub">Step-by-step evaluation workflow for judges</p>
+      </div>
+      <span class="slide-tag">Live Demo Walkthrough</span>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:18px;">
+      <div class="feature-card">
+        <h4>🎬 Recommended 2-Minute Demo Script</h4>
+        <ol style="font-size:12px; color:var(--ink-soft); line-height:1.7; padding-left:18px; margin-top:6px;">
+          <li><strong>Sign In Screen:</strong> Show role selector and test wrong admin password ➔ see blocked alert.</li>
+          <li><strong>Sign Up New Employee:</strong> Register <em>Pooja Sharma</em> (Design) ➔ see immediate personalized greeting.</li>
+          <li><strong>Employee Actions:</strong> Toggle Attendance Punch In/Out ➔ Submit leave request for 25th Aug.</li>
+          <li><strong>Admin Login (<code>ADMIN001</code> / <code>Admin@001</code>):</strong> Go to Leave Approvals ➔ click Approve.</li>
+          <li><strong>Employee Directory:</strong> Inspect newly registered employee at top of Employee Hub!</li>
+        </ol>
+      </div>
+
+      <div class="feature-card">
+        <h4>🏆 Technical Accomplishments</h4>
+        <ul style="font-size:12px; color:var(--ink-soft); line-height:1.7; padding-left:18px; margin-top:6px;">
+          <li><strong>18 Distinct Screens:</strong> Complete UI coverage with zero missing views.</li>
+          <li><strong>Zero-CORS Full-Stack:</strong> Vite proxy connected to Express REST endpoints.</li>
+          <li><strong>Fail-Safe Architecture:</strong> Dual-layer MongoDB persistence + in-memory fallback.</li>
+          <li><strong>Production-Ready Code:</strong> Strict Git commits authored by <code>1nt24cs197pooja-netizen</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="text-align:center; padding:12px; background:var(--blush); border-radius:12px; border:1px solid var(--border);">
+      <h3 class="display" style="font-size:18px; color:var(--wine-dark);">Thank You! Questions &amp; Live Evaluation</h3>
+      <p style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">
+        Repository: <strong class="mono">github.com/djadhav2707/odoo-nmit-hackathon-2026</strong>
+      </p>
+    </div>
+
+    <div class="speaker-notes">
+      <strong>Speaker Notes (Closing):</strong>
+      "Dayflow HRMS delivers a complete, cohesive, and fully functional solution that solves real enterprise needs. We are now ready to demonstrate any screen or workflow live. Thank you!"
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER CONTROLS -->
+<div class="deck-nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">&larr; Previous Slide</button>
+  <div class="slide-counter">
+    Slide <span id="currentSlideNum">1</span> / <span id="totalSlidesNum">7</span>
+    <span style="color:rgba(255,255,255,0.4); margin-left:10px;">[Use &larr; &rarr; Arrow Keys]</span>
+  </div>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next Slide &rarr;</button>
+</div>
+
+<script>
+  let currentIdx = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  document.getElementById('totalSlidesNum').textContent = total;
+
+  function updateDeck() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === currentIdx));
+    document.getElementById('currentSlideNum').textContent = currentIdx + 1;
+    document.getElementById('prevBtn').disabled = currentIdx === 0;
+    document.getElementById('nextBtn').disabled = currentIdx === total - 1;
+  }
+
+  function changeSlide(direction) {
+    currentIdx = Math.max(0, Math.min(total - 1, currentIdx + direction));
+    updateDeck();
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      changeSlide(1);
+    } else if (e.key === 'ArrowLeft') {
+      changeSlide(-1);
+    }
+  });
+
+  updateDeck();
+</script>
+</body>
+</html>
