@@ -1,19 +1,76 @@
 import React, { useState } from 'react';
+import { apiService } from '../../services/api';
 
 export function AuthScreen({ onLogin }) {
   const [authMode, setAuthMode] = useState('signin'); // 'signin' | 'signup'
-  const [role, setRole] = useState('admin'); // 'admin' | 'employee'
-  const [email, setEmail] = useState('priya.s@dayflow.hr');
+  const [role, setRole] = useState('employee'); // 'admin' | 'employee'
+  const [email, setEmail] = useState('rohith.k@dayflow.hr');
   const [password, setPassword] = useState('••••••••');
   const [name, setName] = useState('');
+  const [department, setDepartment] = useState('Engineering');
+  const [designation, setDesignation] = useState('Software Engineer');
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleRoleSelect = (selectedRole) => {
+    setRole(selectedRole);
+    if (authMode === 'signin') {
+      if (selectedRole === 'admin') {
+        setEmail('priya.s@dayflow.hr');
+      } else {
+        setEmail('rohith.k@dayflow.hr');
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin({
-      email,
-      role,
-      name: role === 'admin' ? 'Priya Sharma' : 'Rohith Kumar'
-    });
+    setLoading(true);
+
+    try {
+      if (authMode === 'signup') {
+        const newEmpData = {
+          name: name.trim() || 'New Employee',
+          email: email.trim(),
+          role: role === 'admin' ? 'ADMIN' : 'EMPLOYEE',
+          department: department,
+          designation: designation || (role === 'admin' ? 'HR Administrator' : 'Software Engineer'),
+          phone: '+91 98' + Math.floor(10000000 + Math.random() * 90000000),
+          status: 'Active',
+          joinDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+          salary: '₹12,00,000',
+          ctc: '₹15,00,000',
+          location: 'Bangalore HQ'
+        };
+
+        const created = await apiService.addEmployee(newEmpData);
+        setSuccessMessage(`Account created for ${created.name}! Redirecting...`);
+        
+        setTimeout(() => {
+          onLogin({
+            id: created.id,
+            email: created.email || email,
+            role: role,
+            name: created.name || name,
+            department: created.department,
+            designation: created.designation
+          });
+        }, 700);
+      } else {
+        const authRes = await apiService.login(email, password);
+        onLogin(authRes.user);
+      }
+    } catch (err) {
+      console.error('Auth error:', err);
+      // Fallback
+      onLogin({
+        email,
+        role,
+        name: name || (role === 'admin' ? 'Priya Sharma' : 'Rohith Kumar')
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,7 +92,7 @@ export function AuthScreen({ onLogin }) {
           borderRadius: '28px',
           boxShadow: 'var(--shadow-lg)',
           overflow: 'hidden',
-          minHeight: '560px'
+          minHeight: '580px'
         }}>
           {/* LEFT BRAND PANEL */}
           <div style={{
@@ -69,10 +126,10 @@ export function AuthScreen({ onLogin }) {
               <div style={{ fontSize: '11px', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 600, marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Human Resource Management System
               </div>
-              <h1 className="display" style={{ fontSize: '32px', fontWeight: 600, lineHeight: 1.22, marginBottom: '14px' }}>
-                Empowering teams, simplifying HR workflows.
+              <h1 className="display" style={{ fontSize: '30px', fontWeight: 600, lineHeight: 1.22, marginBottom: '14px' }}>
+                {authMode === 'signup' ? 'Join Dayflow Workforce.' : 'Empowering teams, simplifying HR.'}
               </h1>
-              <p style={{ fontSize: '13.5px', color: 'rgba(255,255,255,0.72)', lineHeight: 1.65 }}>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.72)', lineHeight: 1.6 }}>
                 Streamlined employee records, daily attendance tracking, automated payroll, and instant leave approvals.
               </p>
             </div>
@@ -80,11 +137,11 @@ export function AuthScreen({ onLogin }) {
             <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-                Role-Based Portal Access (Admin / Employee)
+                Real-time MongoDB &amp; Local Persistence
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-                Automated August Payroll Calculation
+                Role-Based Portal Access (Admin &amp; Employee)
               </div>
             </div>
           </div>
@@ -94,15 +151,15 @@ export function AuthScreen({ onLogin }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '48px 44px',
+            padding: '40px 38px',
             position: 'relative'
           }}>
-            <div style={{ width: '100%', maxWidth: '340px' }}>
+            <div style={{ width: '100%', maxWidth: '360px' }}>
               {/* TAB TOGGLE: SIGN IN vs SIGN UP */}
-              <div style={{ display: 'flex', background: 'var(--canvas)', borderRadius: '100px', padding: '4px', marginBottom: '24px', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', background: 'var(--canvas)', borderRadius: '100px', padding: '4px', marginBottom: '18px', border: '1px solid var(--border)' }}>
                 <button
                   type="button"
-                  onClick={() => setAuthMode('signin')}
+                  onClick={() => { setAuthMode('signin'); setSuccessMessage(''); }}
                   style={{
                     flex: 1,
                     border: 'none',
@@ -120,7 +177,7 @@ export function AuthScreen({ onLogin }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAuthMode('signup')}
+                  onClick={() => { setAuthMode('signup'); setSuccessMessage(''); }}
                   style={{
                     flex: 1,
                     border: 'none',
@@ -134,19 +191,19 @@ export function AuthScreen({ onLogin }) {
                     boxShadow: authMode === 'signup' ? 'var(--shadow-sm)' : 'none'
                   }}
                 >
-                  Sign Up
+                  Sign Up (New Employee)
                 </button>
               </div>
 
               {/* DEMO ROLE SWITCHER */}
-              <div style={{ marginBottom: '18px', padding: '10px 12px', background: 'var(--blush)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--wine-mid)', display: 'block', marginBottom: '6px' }}>
-                  Select Portal Role Demo:
+              <div style={{ marginBottom: '16px', padding: '8px 10px', background: 'var(--blush)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <label style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--wine-mid)', display: 'block', marginBottom: '5px' }}>
+                  {authMode === 'signup' ? 'Register As Role:' : 'Quick Demo Role:'}
                 </label>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     type="button"
-                    onClick={() => { setRole('admin'); setEmail('priya.s@dayflow.hr'); }}
+                    onClick={() => handleRoleSelect('admin')}
                     style={{
                       flex: 1,
                       border: 'none',
@@ -163,7 +220,7 @@ export function AuthScreen({ onLogin }) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setRole('employee'); setEmail('rohith.k@dayflow.hr'); }}
+                    onClick={() => handleRoleSelect('employee')}
                     style={{
                       flex: 1,
                       border: 'none',
@@ -181,45 +238,86 @@ export function AuthScreen({ onLogin }) {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {successMessage && (
+                <div style={{ padding: '8px 12px', background: 'var(--success-light)', color: 'var(--success)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, marginBottom: '12px', textAlign: 'center' }}>
+                  {successMessage}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {authMode === 'signup' && (
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Full Name</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Rohith Kumar"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none' }}
-                      required
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '3px' }}>Full Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Pooja Sharma"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none', fontSize: '13px' }}
+                        required
+                      />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '3px' }}>Department</label>
+                        <select
+                          value={department}
+                          onChange={(e) => setDepartment(e.target.value)}
+                          style={{ width: '100%', padding: '9px 8px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none', fontSize: '12px', background: '#fff' }}
+                        >
+                          <option value="Engineering">Engineering</option>
+                          <option value="Design">Design</option>
+                          <option value="Human Resources">HR</option>
+                          <option value="Marketing">Marketing</option>
+                          <option value="Finance">Finance</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '3px' }}>Designation</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Frontend Dev"
+                          value={designation}
+                          onChange={(e) => setDesignation(e.target.value)}
+                          style={{ width: '100%', padding: '9px 10px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none', fontSize: '12px' }}
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Work Email</label>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '3px' }}>Work Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none', fontSize: '13px' }}
                     required
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px' }}>Password</label>
+                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '3px' }}>Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none', fontSize: '13px' }}
                     required
                   />
                 </div>
 
-                <button type="submit" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '6px', padding: '11px' }}>
-                  {authMode === 'signin' ? `Enter Dayflow (${role === 'admin' ? 'Admin Portal' : 'Employee Portal'})` : 'Create Account & Join'}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-primary"
+                  style={{ width: '100%', justifyContent: 'center', marginTop: '6px', padding: '11px', opacity: loading ? 0.7 : 1 }}
+                >
+                  {loading ? 'Processing...' : (authMode === 'signin' ? `Sign In to ${role === 'admin' ? 'Admin Portal' : 'Employee Portal'}` : 'Register & Add to Employees')}
                 </button>
               </form>
             </div>

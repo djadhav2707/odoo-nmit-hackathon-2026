@@ -39,7 +39,7 @@ export const apiService = {
     } catch (e) {
       console.warn('API fetch fallback for dashboard stats:', e);
     }
-    return { ...initialDashboardStats, feed: initialActivityFeed };
+    return { ...initialDashboardStats, totalEmployees: initialEmployees.length, feed: initialActivityFeed };
   },
 
   // Employees
@@ -65,18 +65,23 @@ export const apiService = {
       });
       if (res.ok) {
         const data = await res.json();
-        return data.employee || data;
+        const created = data.employee || data;
+        initialEmployees.unshift(created);
+        return created;
       }
     } catch (e) {
       console.warn('API fetch fallback for addEmployee:', e);
     }
-    return {
-      id: `DF-${Math.floor(1000 + Math.random() * 9000)}`,
+
+    const newEmp = {
+      id: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
       ...employeeData,
       status: 'Active',
       joinDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
       initials: (employeeData.name || 'NE').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     };
+    initialEmployees.unshift(newEmp);
+    return newEmp;
   },
 
   // Attendance
