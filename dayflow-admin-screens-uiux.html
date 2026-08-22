@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dayflow — Admin Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wine-dark: #3D0F27;
+    --wine: #5E1638;
+    --wine-mid: #8C2D5B;
+    --rose: #C93368;
+    --rose-dark: #A8265A;
+    --rose-light: #FBEAF1;
+    --gold: #C6A15B;
+    --gold-light: #F6EEDC;
+    --blush: #F7DCE9;
+    --canvas: #FDF6F9;
+    --surface: #FFFFFF;
+    --ink: #2A1420;
+    --ink-soft: #8A6572;
+    --ink-faint: #C9AEB8;
+    --border: #F0DCE6;
+    --success: #1E9E76;
+    --success-light: #E1F6EE;
+    --danger: #D6483F;
+    --danger-light: #FBE7E5;
+    --warning: #C6A15B;
+    --warning-light: #F6EEDC;
+    --shadow-lg: 0 30px 70px rgba(62,15,39,0.14);
+    --shadow-md: 0 10px 30px rgba(62,15,39,0.10);
+    --shadow-sm: 0 4px 16px rgba(62,15,39,0.08);
+    --radius: 18px;
+    --radius-sm: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Inter', sans-serif; color: var(--ink); background: var(--canvas); -webkit-font-smoothing: antialiased; }
+  .display { font-family: 'Fraunces', serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px; min-width: 240px;
+    background: linear-gradient(170deg, var(--wine-dark) 0%, var(--wine) 60%, var(--wine-mid) 100%);
+    display: flex; flex-direction: column;
+    padding: 24px 0; position: relative; overflow: hidden;
+  }
+  .sidebar::before {
+    content: ''; position: absolute; width: 300px; height: 300px; top: -100px; left: -130px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));
+    clip-path: polygon(0 0, 100% 0, 0 100%); pointer-events: none;
+  }
+  .sidebar::after {
+    content: ''; position: absolute; width: 200px; height: 200px; bottom: -60px; left: -50px;
+    background: linear-gradient(135deg, var(--rose) 0%, transparent 70%);
+    opacity: 0.35; clip-path: polygon(0 100%, 100% 100%, 0 0); pointer-events: none;
+  }
+  .sb-brand {
+    display: flex; align-items: center; gap: 10px; padding: 0 22px 22px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.10); position: relative; z-index: 2;
+  }
+  .sb-logo {
+    width: 36px; height: 36px; border-radius: 11px;
+    background: rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); flex-shrink: 0;
+  }
+  .sb-logo svg { width: 18px; height: 18px; color: #fff; }
+  .sb-brand-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 19px; color: #fff; letter-spacing: .01em; }
+  .sb-badge-admin { font-size: 10px; font-weight: 700; background: var(--gold); color: #fff; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 4px; }
+
+  .sb-nav { flex: 1; padding: 16px 14px 0 14px; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; position: relative; z-index: 2; }
+  .sb-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.38); padding: 14px 8px 4px 8px;
+  }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.68);
+    cursor: pointer; text-decoration: none; transition: background .18s, color .18s; position: relative;
+  }
+  .sb-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .sb-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.92); }
+  .sb-item.active {
+    background: linear-gradient(120deg, rgba(201,51,104,0.38) 0%, rgba(201,51,104,0.18) 100%);
+    color: #fff; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(201,51,104,0.35);
+  }
+  .sb-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 60%; border-radius: 3px; background: var(--rose);
+  }
+  .sb-badge {
+    margin-left: auto; font-size: 11px; font-weight: 700;
+    background: var(--rose); color: #fff; padding: 1px 7px; border-radius: 100px;
+  }
+
+  /* MAIN AREA */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 28px; background: var(--surface);
+    border-bottom: 1.5px solid var(--border); box-shadow: 0 2px 12px rgba(62,15,39,0.04); flex-shrink: 0;
+  }
+  .topbar-left h1 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; }
+  .topbar-left p { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .tb-icon {
+    width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--surface); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ink-soft); transition: border-color .18s, color .18s; position: relative;
+  }
+  .tb-icon svg { width: 16px; height: 16px; }
+  .tb-icon:hover { border-color: var(--rose); color: var(--rose); }
+  .tb-avatar {
+    display: flex; align-items: center; gap: 9px; cursor: pointer;
+    padding: 4px 10px 4px 4px; border-radius: 100px; border: 1.5px solid var(--border);
+  }
+  .av-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--wine) 0%, var(--rose) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .av-name { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.1; }
+  .av-role { font-size: 10.5px; color: var(--ink-faint); }
+
+  /* CONTENT SCREENS */
+  .content { flex: 1; overflow-y: auto; padding: 22px 28px; }
+  .screen { display: none; animation: fadeIn .3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* COMMON CARDS & UI COMPONENTS */
+  .card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px 22px; box-shadow: var(--shadow-sm); border: 1.5px solid var(--border);
+  }
+  .card-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+  .card-sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+  .btn {
+    border: none; border-radius: 100px; padding: 9px 18px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 6px;
+    transition: transform .15s, box-shadow .2s; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn-primary {
+    background: linear-gradient(120deg, var(--rose) 0%, var(--wine-mid) 100%);
+    color: #fff; box-shadow: 0 4px 14px rgba(201,51,104,0.25);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,51,104,0.35); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:hover { border-color: var(--rose); color: var(--rose); background: var(--rose-light); }
+  .btn-success { background: var(--success-light); color: var(--success); border: 1px solid rgba(30,158,118,0.25); }
+  .btn-success:hover { background: var(--success); color: #fff; }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid rgba(214,72,63,0.25); }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 100px; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-success { background: var(--success-light); color: var(--success); }
+  .badge-danger { background: var(--danger-light); color: var(--danger); }
+  .badge-warning { background: var(--gold-light); color: var(--gold); }
+  .badge-rose { background: var(--rose-light); color: var(--rose-dark); }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 100px;
+  }
+  .status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .pill-present { background: var(--success-light); color: var(--success); }
+  .pill-present::before { background: var(--success); }
+  .pill-late { background: var(--gold-light); color: var(--gold); }
+  .pill-late::before { background: var(--gold); }
+  .pill-absent { background: var(--danger-light); color: var(--danger); }
+  .pill-absent::before { background: var(--danger); }
+  .pill-leave { background: var(--rose-light); color: var(--rose-dark); }
+  .pill-leave::before { background: var(--rose); }
+  .pill-pending { background: var(--blush); color: var(--wine-mid); }
+  .pill-pending::before { background: var(--wine-mid); }
+
+  /* STAT CARDS */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--surface); border-radius: var(--radius); padding: 18px 20px;
+    border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);
+  }
+  .stat-card.featured {
+    background: linear-gradient(135deg, var(--wine-dark) 0%, var(--wine) 100%);
+    color: #fff; border-color: transparent;
+  }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-faint); padding: 0 0 10px 0; text-align: left; border-bottom: 1.5px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 11px 0; font-size: 12.5px; vertical-align: middle; }
+
+  /* SEARCH & FILTER BAR */
+  .filter-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px;
+  }
+  .search-input-wrap {
+    display: flex; align-items: center; gap: 8px; background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 100px; padding: 7px 16px; flex: 1; max-width: 320px;
+  }
+  .search-input-wrap input { border: none; outline: none; background: transparent; font-size: 12.5px; width: 100%; }
+
+  /* EMPLOYEE GRID */
+  .emp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .emp-card {
+    background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border);
+    padding: 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;
+    transition: transform .18s, box-shadow .18s;
+  }
+  .emp-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .emp-card-top { display: flex; align-items: center; gap: 12px; }
+  .emp-avatar-md {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--rose) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; font-size: 14px; flex-shrink: 0;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(42, 20, 32, 0.45); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 999;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-card {
+    background: var(--surface); border-radius: 24px; width: 100%; max-width: 520px;
+    padding: 28px; box-shadow: var(--shadow-lg); border: 1.5px solid var(--border);
+    animation: popIn .25s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* TABS */
+  .tab-row { display: flex; gap: 8px; border-bottom: 1.5px solid var(--border); margin-bottom: 18px; }
+  .tab-nav-btn {
+    border: none; background: transparent; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    padding: 8px 16px; cursor: pointer; position: relative;
+  }
+  .tab-nav-btn.active { color: var(--rose); }
+  .tab-nav-btn.active::after {
+    content: ''; position: absolute; bottom: -1.5px; left: 0; right: 0; height: 2px; background: var(--rose);
+  }
+
+  /* QUICK ACTIONS GRID */
+  .qa-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .qa-btn {
+    display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 12px;
+    border: 1px solid var(--border); cursor: pointer; transition: all .18s;
+  }
+  .qa-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); border-color: var(--rose); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="sb-brand-name">Dayflow</span>
+      <span class="sb-badge-admin">Admin</span>
+    </div>
+
+    <nav class="sb-nav">
+      <span class="sb-section-label">Management</span>
+      <a class="sb-item active" onclick="showAdminScreen('dashboard', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Admin Dashboard</span>
+      </a>
+      <a class="sb-item" onclick="showAdminScreen('employees', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        <span>Employee Hub</span>
+      </a>
+      <a class="sb-item" onclick="showAdminScreen('attendance', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>Attendance Hub</span>
+      </a>
+      <a class="sb-item" onclick="showAdminScreen('leave-approval', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <span>Leave Approvals</span>
+        <span class="sb-badge" id="pending-leave-badge">4</span>
+      </a>
+      <a class="sb-item" onclick="showAdminScreen('payroll', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <span>Payroll Console</span>
+      </a>
+      <a class="sb-item" onclick="showAdminScreen('reports', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Analytics &amp; Reports</span>
+      </a>
+
+      <span class="sb-section-label">System</span>
+      <a class="sb-item" href="dayflow-employee-screens-uiux.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span>Switch to Employee View</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="admin-topbar-title">Admin Dashboard</h1>
+        <p id="admin-topbar-sub">Organization metrics, workforce statistics &amp; approvals</p>
+      </div>
+      <div class="topbar-right">
+        <div class="tb-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <div class="tb-icon" onclick="showAdminScreen('leave-approval')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </div>
+        <div class="tb-avatar">
+          <div class="av-circle">PS</div>
+          <div>
+            <div class="av-name">Priya Sharma</div>
+            <div class="av-role">HR Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ================= SCREEN 1: ADMIN DASHBOARD ================= -->
+      <div class="screen active" id="admin-screen-dashboard">
+        <div class="stat-row">
+          <div class="stat-card featured">
+            <div style="font-size:12px; opacity:.8;">Total Headcount</div>
+            <div class="display" style="font-size:32px; font-weight:700; margin:4px 0;">248</div>
+            <span class="badge" style="background:rgba(30,158,118,0.25); color:#6DDBB5;">+8.4% this quarter</span>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:12px; color:var(--ink-soft);">Present Today</div>
+            <div class="display" style="font-size:32px; font-weight:700; color:var(--success); margin:4px 0;">219</div>
+            <span class="badge badge-success">88.3% Attendance</span>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:12px; color:var(--ink-soft);">Pending Leave Approvals</div>
+            <div class="display" style="font-size:32px; font-weight:700; color:var(--rose); margin:4px 0;">4</div>
+            <span class="badge badge-rose">Requires Action</span>
+          </div>
+          <div class="stat-card">
+            <div style="font-size:12px; color:var(--ink-soft);">August Payroll Run</div>
+            <div class="display" style="font-size:32px; font-weight:700; color:var(--wine-mid); margin:4px 0;">₹14.2L</div>
+            <span class="badge badge-warning">Due in 9 Days</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:16px; margin-bottom:20px;">
+          <!-- Recent Activity Feed -->
+          <div class="card">
+            <div class="card-hd">
+              <div>
+                <div class="card-title">Live Organization Feed</div>
+                <div class="card-sub">Recent workforce updates, requests and logs</div>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:32px; height:32px; border-radius:50%; background:var(--rose-light); color:var(--rose); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">RK</div>
+                  <div><strong style="font-size:12.5px;">Rohith Kumar</strong> submitted 2 days Annual Leave</div>
+                </div>
+                <span style="font-size:11px; color:var(--ink-faint);">10m ago</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:32px; height:32px; border-radius:50%; background:var(--gold-light); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">AP</div>
+                  <div><strong style="font-size:12.5px;">Ananya Priya</strong> checked in late (09:47 AM)</div>
+                </div>
+                <span style="font-size:11px; color:var(--ink-faint);">1h ago</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:32px; height:32px; border-radius:50%; background:var(--success-light); color:var(--success); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">VR</div>
+                  <div><strong style="font-size:12.5px;">Vijay Raj</strong> updated tax declaration documents</div>
+                </div>
+                <span style="font-size:11px; color:var(--ink-faint);">3h ago</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card-hd">
+              <div class="card-title">Quick HR Actions</div>
+            </div>
+            <div class="qa-grid">
+              <div class="qa-btn" style="background:var(--rose-light);" onclick="openAddModal()">
+                <strong style="color:var(--rose-dark); font-size:13px;">+ Add Employee</strong>
+                <span style="font-size:11px; color:var(--ink-soft);">Onboard a new hire</span>
+              </div>
+              <div class="qa-btn" style="background:var(--success-light);" onclick="showAdminScreen('leave-approval')">
+                <strong style="color:var(--success); font-size:13px;">Approve Leaves</strong>
+                <span style="font-size:11px; color:var(--ink-soft);">4 requests pending</span>
+              </div>
+              <div class="qa-btn" style="background:var(--gold-light);" onclick="showAdminScreen('payroll')">
+                <strong style="color:var(--gold); font-size:13px;">Run Payroll</strong>
+                <span style="font-size:11px; color:var(--ink-soft);">Process August salaries</span>
+              </div>
+              <div class="qa-btn" style="background:var(--blush);" onclick="showAdminScreen('reports')">
+                <strong style="color:var(--wine-mid); font-size:13px;">Export Report</strong>
+                <span style="font-size:11px; color:var(--ink-soft);">Monthly compliance PDF</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 2: EMPLOYEE MANAGEMENT ================= -->
+      <div class="screen" id="admin-screen-employees">
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Search employees by name, role or ID..."/>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <select style="border:1.5px solid var(--border); border-radius:100px; padding:6px 14px; background:#fff; font-size:12px; outline:none;">
+              <option>All Departments</option><option>Engineering</option><option>Marketing</option><option>HR</option><option>Operations</option>
+            </select>
+            <button class="btn btn-primary" onclick="openAddModal()">+ Add New Employee</button>
+          </div>
+        </div>
+
+        <div class="emp-grid">
+          <!-- Emp 1 -->
+          <div class="emp-card">
+            <div class="emp-card-top">
+              <div class="emp-avatar-md">RK</div>
+              <div>
+                <strong style="font-size:14px;">Rohith Kumar</strong>
+                <div style="font-size:11.5px; color:var(--ink-soft);">Senior Software Engineer</div>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; padding:8px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+              <span>ID: <strong class="mono">DF-2024-0112</strong></span>
+              <span class="badge badge-success">Active</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; gap:8px;">
+              <button class="btn btn-outline" style="flex:1; justify-content:center; padding:5px 0; font-size:11px;" onclick="showAdminScreen('employee-details')">View Details</button>
+              <button class="btn btn-outline" style="padding:5px 10px; font-size:11px;">Edit</button>
+            </div>
+          </div>
+
+          <!-- Emp 2 -->
+          <div class="emp-card">
+            <div class="emp-card-top">
+              <div class="emp-avatar-md" style="background:linear-gradient(135deg, var(--rose), var(--wine));">AP</div>
+              <div>
+                <strong style="font-size:14px;">Ananya Priya</strong>
+                <div style="font-size:11.5px; color:var(--ink-soft);">Marketing Lead</div>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; padding:8px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+              <span>ID: <strong class="mono">DF-2023-0089</strong></span>
+              <span class="badge badge-success">Active</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; gap:8px;">
+              <button class="btn btn-outline" style="flex:1; justify-content:center; padding:5px 0; font-size:11px;" onclick="showAdminScreen('employee-details')">View Details</button>
+              <button class="btn btn-outline" style="padding:5px 10px; font-size:11px;">Edit</button>
+            </div>
+          </div>
+
+          <!-- Emp 3 -->
+          <div class="emp-card">
+            <div class="emp-card-top">
+              <div class="emp-avatar-md" style="background:linear-gradient(135deg, var(--gold), var(--wine-mid));">SM</div>
+              <div>
+                <strong style="font-size:14px;">Siddharth Menon</strong>
+                <div style="font-size:11.5px; color:var(--ink-soft);">Operations Manager</div>
+              </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:11.5px; padding:8px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+              <span>ID: <strong class="mono">DF-2022-0045</strong></span>
+              <span class="badge badge-success">Active</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; gap:8px;">
+              <button class="btn btn-outline" style="flex:1; justify-content:center; padding:5px 0; font-size:11px;" onclick="showAdminScreen('employee-details')">View Details</button>
+              <button class="btn btn-outline" style="padding:5px 10px; font-size:11px;">Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 3: EMPLOYEE DETAILS ================= -->
+      <div class="screen" id="admin-screen-employee-details">
+        <button class="btn btn-outline" style="margin-bottom:14px;" onclick="showAdminScreen('employees')">&larr; Back to Employee Hub</button>
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--gold), var(--rose)); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700;">RK</div>
+              <div>
+                <h2 class="display" style="font-size:20px;">Rohith Kumar</h2>
+                <p style="font-size:12.5px; color:var(--ink-soft);">Senior Software Engineer &bull; Product Engineering &bull; Employee ID: DF-2024-0112</p>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-outline">Reset Password</button>
+              <button class="btn btn-danger">Deactivate</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tab-row">
+            <button class="tab-nav-btn active">Personal Info</button>
+            <button class="tab-nav-btn">Employment</button>
+            <button class="tab-nav-btn">Salary Package</button>
+            <button class="tab-nav-btn">Leave Records</button>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:18px;">
+            <div><label style="font-size:10.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase;">Email</label><div style="font-size:13.5px; font-weight:600;">rohith.kumar@dayflow.io</div></div>
+            <div><label style="font-size:10.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase;">Phone</label><div style="font-size:13.5px; font-weight:600;">+91 98450 12345</div></div>
+            <div><label style="font-size:10.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase;">Join Date</label><div style="font-size:13.5px; font-weight:600;">12 Jan 2023</div></div>
+            <div><label style="font-size:10.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase;">Monthly CTC</label><div style="font-size:13.5px; font-weight:600;">₹85,000.00</div></div>
+            <div><label style="font-size:10.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase;">Reporting Manager</label><div style="font-size:13.5px; font-weight:600;">Priya Sharma (VP Engg)</div></div>
+            <div><label style="font-size:10.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase;">Work Location</label><div style="font-size:13.5px; font-weight:600;">Bengaluru HQ (Hybrid)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 4: ATTENDANCE MANAGEMENT ================= -->
+      <div class="screen" id="admin-screen-attendance">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">Daily Workforce Attendance</div>
+              <div class="card-sub">22 August 2026 &bull; Real-time logs and attendance status overrides</div>
+            </div>
+            <button class="btn btn-outline" style="font-size:11.5px;">Bulk Export CSV</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Employee</th><th>Dept</th><th>Check In</th><th>Check Out</th><th>Effective</th><th>Status</th><th>Override Action</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Rohith Kumar</strong> (DF-2024-0112)</td>
+                <td>Engineering</td>
+                <td class="mono">09:03 AM</td>
+                <td class="mono">06:05 PM</td>
+                <td class="mono">9h 02m</td>
+                <td><span class="status-pill pill-present">Present</span></td>
+                <td><button class="btn btn-outline" style="padding:3px 10px; font-size:11px;" onclick="alert('Override modal opened')">Override</button></td>
+              </tr>
+              <tr>
+                <td><strong>Ananya Priya</strong> (DF-2023-0089)</td>
+                <td>Marketing</td>
+                <td class="mono">09:47 AM</td>
+                <td class="mono">06:30 PM</td>
+                <td class="mono">8h 43m</td>
+                <td><span class="status-pill pill-late">Late (47m)</span></td>
+                <td><button class="btn btn-outline" style="padding:3px 10px; font-size:11px;" onclick="alert('Override modal opened')">Override</button></td>
+              </tr>
+              <tr>
+                <td><strong>Siddharth Menon</strong> (DF-2022-0045)</td>
+                <td>Operations</td>
+                <td class="mono">—</td>
+                <td class="mono">—</td>
+                <td class="mono">0h 00m</td>
+                <td><span class="status-pill pill-absent">Absent</span></td>
+                <td><button class="btn btn-outline" style="padding:3px 10px; font-size:11px;" onclick="alert('Override modal opened')">Override</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 5: LEAVE APPROVAL ================= -->
+      <div class="screen" id="admin-screen-leave-approval">
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">Pending Leave Requests</div>
+              <div class="card-sub">Review and take immediate action on employee time-off requests</div>
+            </div>
+          </div>
+
+          <div id="leave-requests-container" style="display:flex; flex-direction:column; gap:12px;">
+            <!-- Request 1 -->
+            <div class="card" id="req-1" style="background:var(--canvas); border-left:4px solid var(--rose);">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <strong style="font-size:14px;">Rohith Kumar</strong>
+                    <span class="badge badge-rose">Annual Leave &bull; 2.0 Days</span>
+                  </div>
+                  <div style="font-size:12px; color:var(--ink-soft); margin-top:3px;">Duration: <strong>25 Aug 2026 – 26 Aug 2026</strong></div>
+                  <p style="font-size:12.5px; color:var(--ink); margin-top:6px; background:#fff; padding:8px 12px; border-radius:8px;">Reason: "Family wedding out of town. All tasks handed over to Vijay."</p>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-danger" onclick="rejectLeave('req-1')">Reject</button>
+                  <button class="btn btn-success" onclick="approveLeave('req-1')">Approve Request</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Request 2 -->
+            <div class="card" id="req-2" style="background:var(--canvas); border-left:4px solid var(--gold);">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <strong style="font-size:14px;">Kavitha N.</strong>
+                    <span class="badge badge-warning">Sick Leave &bull; 1.0 Day</span>
+                  </div>
+                  <div style="font-size:12px; color:var(--ink-soft); margin-top:3px;">Duration: <strong>23 Aug 2026</strong></div>
+                  <p style="font-size:12.5px; color:var(--ink); margin-top:6px; background:#fff; padding:8px 12px; border-radius:8px;">Reason: "Doctor appointment and diagnostic tests."</p>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-danger" onclick="rejectLeave('req-2')">Reject</button>
+                  <button class="btn btn-success" onclick="approveLeave('req-2')">Approve Request</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 6: PAYROLL MANAGEMENT ================= -->
+      <div class="screen" id="admin-screen-payroll">
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">August 2026 Payroll Run</div>
+              <div class="card-sub">Total Disbursable: <strong>₹14,20,500.00</strong> across 248 employees</div>
+            </div>
+            <button class="btn btn-primary" onclick="alert('August Payroll Run Initiated!')">Run Payroll Batch</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Employee</th><th>Basic</th><th>HRA</th><th>Gross CTC</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Rohith Kumar</strong></td>
+                <td class="mono">₹45,000</td>
+                <td class="mono">₹22,500</td>
+                <td class="mono">₹85,000</td>
+                <td class="mono">₹12,600</td>
+                <td><strong class="mono" style="color:var(--wine-mid);">₹72,400</strong></td>
+                <td><span class="status-pill pill-pending">Pending Run</span></td>
+                <td><button class="btn btn-outline" style="padding:3px 10px; font-size:11px;">View Slip</button></td>
+              </tr>
+              <tr>
+                <td><strong>Ananya Priya</strong></td>
+                <td class="mono">₹50,000</td>
+                <td class="mono">₹25,000</td>
+                <td class="mono">₹95,000</td>
+                <td class="mono">₹14,200</td>
+                <td><strong class="mono" style="color:var(--wine-mid);">₹80,800</strong></td>
+                <td><span class="status-pill pill-pending">Pending Run</span></td>
+                <td><button class="btn btn-outline" style="padding:3px 10px; font-size:11px;">View Slip</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 7: REPORTS ================= -->
+      <div class="screen" id="admin-screen-reports">
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; margin-bottom:20px;">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:4px;">Workforce Attendance Report</div>
+            <p style="font-size:12px; color:var(--ink-soft); margin-bottom:14px;">Detailed summary of attendance %, late check-ins and overtime hours.</p>
+            <button class="btn btn-primary" onclick="alert('Exporting Attendance Report...')">Download PDF / Excel</button>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:4px;">Payroll &amp; Tax Statutory Report</div>
+            <p style="font-size:12px; color:var(--ink-soft); margin-bottom:14px;">Monthly PF, TDS and PT tax compliance register for audit.</p>
+            <button class="btn btn-primary" onclick="alert('Exporting Payroll Report...')">Download PDF / Excel</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADD EMPLOYEE MODAL -->
+<div class="modal-overlay" id="addEmpModal">
+  <div class="modal-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 class="display" style="font-size:18px;">Add New Employee</h3>
+      <button onclick="closeAddModal()" style="background:none; border:none; font-size:18px; cursor:pointer;">&times;</button>
+    </div>
+    <form onsubmit="event.preventDefault(); alert('Employee added successfully!'); closeAddModal();">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <input type="text" placeholder="Full Name" required style="padding:8px 12px; border-radius:8px; border:1px solid var(--border);"/>
+        <input type="email" placeholder="Work Email" required style="padding:8px 12px; border-radius:8px; border:1px solid var(--border);"/>
+        <select required style="padding:8px 12px; border-radius:8px; border:1px solid var(--border);">
+          <option value="">Select Department...</option>
+          <option>Engineering</option><option>Marketing</option><option>HR</option><option>Operations</option>
+        </select>
+        <input type="text" placeholder="Designation (e.g. Frontend Developer)" required style="padding:8px 12px; border-radius:8px; border:1px solid var(--border);"/>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+          <button type="button" class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save &amp; Send Invite</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const adminPageTitles = {
+  'dashboard': { title: 'Admin Dashboard', sub: 'Organization metrics, workforce statistics & approvals' },
+  'employees': { title: 'Employee Hub', sub: 'Manage employees, roles and department assignments' },
+  'employee-details': { title: 'Employee Details', sub: 'Comprehensive profile, attendance & salary breakdown' },
+  'attendance': { title: 'Attendance Hub', sub: 'Daily check-in logs, shifts and status overrides' },
+  'leave-approval': { title: 'Leave Approvals', sub: 'Pending employee time-off approval requests' },
+  'payroll': { title: 'Payroll Console', sub: 'Monthly salary disbursement, deductions and slips' },
+  'reports': { title: 'Analytics & Reports', sub: 'Export attendance, tax compliance & HR analytics' }
+};
+
+function showAdminScreen(screenId, navEl) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('admin-screen-' + screenId);
+  if (target) target.classList.add('active');
+
+  if (navEl) {
+    document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+    navEl.classList.add('active');
+  }
+
+  if (adminPageTitles[screenId]) {
+    document.getElementById('admin-topbar-title').textContent = adminPageTitles[screenId].title;
+    document.getElementById('admin-topbar-sub').textContent = adminPageTitles[screenId].sub;
+  }
+}
+
+function openAddModal() {
+  document.getElementById('addEmpModal').classList.add('active');
+}
+function closeAddModal() {
+  document.getElementById('addEmpModal').classList.remove('active');
+}
+
+function approveLeave(reqId) {
+  const el = document.getElementById(reqId);
+  if (el) {
+    el.innerHTML = '<div style="color:var(--success); font-weight:600; padding:8px 0;">✓ Leave Request Approved Successfully</div>';
+    setTimeout(() => el.remove(), 1200);
+  }
+}
+
+function rejectLeave(reqId) {
+  const el = document.getElementById(reqId);
+  if (el) {
+    el.innerHTML = '<div style="color:var(--danger); font-weight:600; padding:8px 0;">✗ Leave Request Rejected</div>';
+    setTimeout(() => el.remove(), 1200);
+  }
+}
+</script>
+</body>
+</html>
