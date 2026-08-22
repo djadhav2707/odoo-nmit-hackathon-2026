@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dayflow — Employee Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wine-dark: #3D0F27;
+    --wine: #5E1638;
+    --wine-mid: #8C2D5B;
+    --rose: #C93368;
+    --rose-dark: #A8265A;
+    --rose-light: #FBEAF1;
+    --gold: #C6A15B;
+    --gold-light: #F6EEDC;
+    --blush: #F7DCE9;
+    --canvas: #FDF6F9;
+    --surface: #FFFFFF;
+    --ink: #2A1420;
+    --ink-soft: #8A6572;
+    --ink-faint: #C9AEB8;
+    --border: #F0DCE6;
+    --success: #1E9E76;
+    --success-light: #E1F6EE;
+    --danger: #D6483F;
+    --danger-light: #FBE7E5;
+    --warning: #C6A15B;
+    --warning-light: #F6EEDC;
+    --shadow-lg: 0 30px 70px rgba(62,15,39,0.14);
+    --shadow-md: 0 10px 30px rgba(62,15,39,0.10);
+    --shadow-sm: 0 4px 16px rgba(62,15,39,0.08);
+    --radius: 18px;
+    --radius-sm: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Inter', sans-serif; color: var(--ink); background: var(--canvas); -webkit-font-smoothing: antialiased; }
+  .display { font-family: 'Fraunces', serif; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 232px; min-width: 232px;
+    background: linear-gradient(170deg, var(--wine-dark) 0%, var(--wine) 60%, var(--wine-mid) 100%);
+    display: flex; flex-direction: column;
+    padding: 24px 0; position: relative; overflow: hidden;
+  }
+  .sidebar::before {
+    content: ''; position: absolute; width: 300px; height: 300px; top: -100px; left: -130px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));
+    clip-path: polygon(0 0, 100% 0, 0 100%); pointer-events: none;
+  }
+  .sidebar::after {
+    content: ''; position: absolute; width: 200px; height: 200px; bottom: -60px; left: -50px;
+    background: linear-gradient(135deg, var(--rose) 0%, transparent 70%);
+    opacity: 0.35; clip-path: polygon(0 100%, 100% 100%, 0 0); pointer-events: none;
+  }
+  .sb-brand {
+    display: flex; align-items: center; gap: 10px; padding: 0 22px 22px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.10); position: relative; z-index: 2;
+  }
+  .sb-logo {
+    width: 36px; height: 36px; border-radius: 11px;
+    background: rgba(255,255,255,0.14); display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); flex-shrink: 0;
+  }
+  .sb-logo svg { width: 18px; height: 18px; color: #fff; }
+  .sb-brand-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 19px; color: #fff; letter-spacing: .01em; }
+
+  .sb-nav { flex: 1; padding: 16px 14px 0 14px; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; position: relative; z-index: 2; }
+  .sb-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(255,255,255,0.38); padding: 14px 8px 4px 8px;
+  }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,0.68);
+    cursor: pointer; text-decoration: none; transition: background .18s, color .18s; position: relative;
+  }
+  .sb-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .sb-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.92); }
+  .sb-item.active {
+    background: linear-gradient(120deg, rgba(201,51,104,0.38) 0%, rgba(201,51,104,0.18) 100%);
+    color: #fff; font-weight: 600; box-shadow: inset 0 0 0 1px rgba(201,51,104,0.35);
+  }
+  .sb-item.active::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 60%; border-radius: 3px; background: var(--rose);
+  }
+  .sb-badge {
+    margin-left: auto; font-size: 11px; font-weight: 700;
+    background: var(--rose); color: #fff; padding: 1px 7px; border-radius: 100px;
+  }
+
+  .sb-upgrade {
+    margin: 14px 14px 0 14px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(198,161,91,0.20) 0%, rgba(255,255,255,0.06) 100%);
+    border: 1px solid rgba(198,161,91,0.28); padding: 14px; position: relative; z-index: 2;
+  }
+  .sb-upgrade h4 { font-family: 'Fraunces', serif; font-size: 13.5px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .sb-upgrade p { font-size: 11px; color: rgba(255,255,255,0.52); line-height: 1.45; margin-bottom: 10px; }
+  .sb-upgrade-btn {
+    width: 100%; border: none; border-radius: 8px; padding: 8px 0;
+    background: linear-gradient(120deg, var(--gold) 0%, var(--rose) 100%);
+    color: #fff; font-size: 11.5px; font-weight: 700; letter-spacing: .03em;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .sb-upgrade-btn:hover { opacity: .88; }
+
+  /* MAIN WRAPPER */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 28px; background: var(--surface);
+    border-bottom: 1.5px solid var(--border); box-shadow: 0 2px 12px rgba(62,15,39,0.04); flex-shrink: 0;
+  }
+  .topbar-left h1 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; }
+  .topbar-left p { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .tb-icon {
+    width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--surface); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ink-soft); transition: border-color .18s, color .18s; position: relative;
+  }
+  .tb-icon svg { width: 16px; height: 16px; }
+  .tb-icon:hover { border-color: var(--rose); color: var(--rose); }
+  .tb-dot::after {
+    content: ''; position: absolute; top: 6px; right: 6px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--rose); border: 1.5px solid var(--surface);
+  }
+  .tb-avatar {
+    display: flex; align-items: center; gap: 9px; cursor: pointer;
+    padding: 4px 10px 4px 4px; border-radius: 100px; border: 1.5px solid var(--border);
+  }
+  .tb-avatar:hover { border-color: var(--rose); }
+  .av-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--rose) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .av-name { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.1; }
+  .av-role { font-size: 10.5px; color: var(--ink-faint); }
+
+  /* CONTENT SCREENS */
+  .content { flex: 1; overflow-y: auto; padding: 22px 28px; }
+  .screen { display: none; animation: fadeIn .3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* COMMON CARDS & UI COMPONENTS */
+  .card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px 22px; box-shadow: var(--shadow-sm); border: 1.5px solid var(--border);
+  }
+  .card-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+  .card-sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  
+  .btn {
+    border: none; border-radius: 100px; padding: 10px 20px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 7px;
+    transition: transform .15s, box-shadow .2s; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn-primary {
+    background: linear-gradient(120deg, var(--rose) 0%, var(--wine-mid) 100%);
+    color: #fff; box-shadow: 0 6px 18px rgba(201,51,104,0.28);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,51,104,0.38); }
+  .btn-outline {
+    background: transparent; border: 1.5px solid var(--border); color: var(--ink);
+  }
+  .btn-outline:hover { border-color: var(--rose); color: var(--rose); background: var(--rose-light); }
+  .btn-danger {
+    background: var(--danger-light); color: var(--danger); border: 1px solid rgba(214,72,63,0.2);
+  }
+  .btn-danger:hover { background: var(--danger); color: #fff; }
+
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 100px; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-success { background: var(--success-light); color: var(--success); }
+  .badge-danger { background: var(--danger-light); color: var(--danger); }
+  .badge-warning { background: var(--gold-light); color: var(--gold); }
+  .badge-rose { background: var(--rose-light); color: var(--rose-dark); }
+  .badge-wine { background: var(--blush); color: var(--wine-dark); }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+    padding: 3px 10px; border-radius: 100px;
+  }
+  .status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .pill-present { background: var(--success-light); color: var(--success); }
+  .pill-present::before { background: var(--success); }
+  .pill-late { background: var(--gold-light); color: var(--gold); }
+  .pill-late::before { background: var(--gold); }
+  .pill-absent { background: var(--danger-light); color: var(--danger); }
+  .pill-absent::before { background: var(--danger); }
+  .pill-leave { background: var(--rose-light); color: var(--rose-dark); }
+  .pill-leave::before { background: var(--rose); }
+  .pill-pending { background: var(--blush); color: var(--wine-mid); }
+  .pill-pending::before { background: var(--wine-mid); }
+
+  /* FORM CONTROLS */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 11px; font-weight: 700; color: var(--ink-faint); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+  .input-wrap {
+    display: flex; align-items: center; gap: 8px; border-bottom: 1.5px solid var(--border); padding-bottom: 7px;
+    transition: border-color .2s;
+  }
+  .input-wrap:focus-within { border-color: var(--rose); }
+  .input-wrap input, .input-wrap select, .input-wrap textarea {
+    flex: 1; border: none; outline: none; background: transparent; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink);
+  }
+  .input-wrap textarea { resize: vertical; min-height: 60px; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-faint); padding: 0 0 10px 0; text-align: left; border-bottom: 1.5px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 12px 0; font-size: 13px; vertical-align: middle; }
+
+  /* ========================================================
+     SCREEN 1: PROFILE STYLES
+     ======================================================== */
+  .profile-grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+  .profile-hero-card {
+    background: var(--surface); border-radius: var(--radius); padding: 28px 20px;
+    text-align: center; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);
+  }
+  .profile-avatar-lg {
+    width: 84px; height: 84px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--rose) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: #fff;
+    margin: 0 auto 16px auto; box-shadow: 0 8px 20px rgba(201,51,104,0.25); position: relative;
+  }
+  .profile-name { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .profile-role-tag {
+    display: inline-block; background: var(--rose-light); color: var(--rose-dark);
+    font-size: 11.5px; font-weight: 700; padding: 3px 12px; border-radius: 100px; margin-bottom: 12px;
+  }
+  .profile-meta { font-size: 12px; color: var(--ink-soft); margin-bottom: 20px; line-height: 1.6; }
+  .profile-stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  .p-stat-val { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; color: var(--ink); }
+  .p-stat-lbl { font-size: 10.5px; color: var(--ink-faint); margin-top: 2px; }
+
+  .info-group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 24px; }
+  .info-item label { display: block; font-size: 10.5px; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+  .info-item div { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+
+  .doc-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; background: var(--canvas); border-radius: 10px; margin-bottom: 8px;
+  }
+  .doc-left { display: flex; align-items: center; gap: 12px; }
+  .doc-icon {
+    width: 32px; height: 32px; border-radius: 8px; background: var(--rose-light); color: var(--rose);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ========================================================
+     SCREEN 2: ATTENDANCE STYLES
+     ======================================================== */
+  .att-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .att-stat-card {
+    background: var(--surface); border-radius: var(--radius); padding: 18px 20px;
+    border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);
+  }
+  .att-stat-card.featured {
+    background: linear-gradient(135deg, var(--wine-dark) 0%, var(--wine) 100%);
+    color: #fff; border-color: transparent;
+  }
+  .cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; margin-top: 14px;
+  }
+  .cal-day-name { font-size: 11px; font-weight: 700; color: var(--ink-faint); padding-bottom: 6px; }
+  .cal-cell {
+    background: var(--canvas); border-radius: 10px; padding: 12px 4px; font-size: 12.5px;
+    font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: transform .15s; cursor: default;
+  }
+  .cal-cell:hover { transform: translateY(-2px); background: #fff; box-shadow: var(--shadow-sm); }
+  .cal-cell.today { border: 1.5px solid var(--rose); }
+  .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ========================================================
+     SCREEN 3: LEAVE APPLICATION STYLES
+     ======================================================== */
+  .leave-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+  .balance-card {
+    border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .upload-area {
+    border: 2px dashed var(--border); border-radius: 12px; padding: 24px;
+    text-align: center; color: var(--ink-soft); font-size: 12px; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .upload-area:hover { border-color: var(--rose); background: var(--rose-light); }
+
+  /* ========================================================
+     SCREEN 5: SALARY / PAYROLL STYLES
+     ======================================================== */
+  .salary-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .pay-total-row {
+    background: linear-gradient(135deg, var(--wine-dark) 0%, var(--wine) 100%);
+    color: #fff; padding: 16px 20px; border-radius: 12px; margin-top: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  /* ========================================================
+     SCREEN 6: NOTIFICATIONS STYLES
+     ======================================================== */
+  .notif-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab-btn {
+    border: none; background: var(--canvas); color: var(--ink-soft); font-size: 12px;
+    font-weight: 600; padding: 6px 14px; border-radius: 100px; cursor: pointer;
+    transition: all .2s;
+  }
+  .tab-btn.active { background: var(--rose); color: #fff; }
+  .notif-item {
+    display: flex; align-items: flex-start; gap: 14px; padding: 16px;
+    background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
+    margin-bottom: 10px; transition: transform .15s;
+  }
+  .notif-item.unread {
+    background: var(--canvas); border-left: 4px solid var(--rose);
+  }
+  .notif-icon-circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v9l6 3"/><circle cx="12" cy="12" r="9"/></svg>
+      </div>
+      <span class="sb-brand-name">Dayflow</span>
+    </div>
+
+    <nav class="sb-nav">
+      <span class="sb-section-label">Menu</span>
+      <a class="sb-item" href="dayflow-dashboard-uiux.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sb-item active" onclick="showScreen('profile', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span>My Profile</span>
+      </a>
+      <a class="sb-item" onclick="showScreen('attendance', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>Attendance</span>
+      </a>
+      <a class="sb-item" onclick="showScreen('leave-apply', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <span>Apply Leave</span>
+      </a>
+      <a class="sb-item" onclick="showScreen('leave-history', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>Leave History</span>
+      </a>
+      <a class="sb-item" onclick="showScreen('salary', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        <span>Salary &amp; Payroll</span>
+      </a>
+
+      <span class="sb-section-label">Tools</span>
+      <a class="sb-item" onclick="showScreen('notifications', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span>Notifications</span>
+        <span class="sb-badge">3</span>
+      </a>
+      <a class="sb-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sb-upgrade">
+      <h4>Employee Perks</h4>
+      <p>Explore flexible benefits and tax saving options.</p>
+      <button class="sb-upgrade-btn">View Benefits</button>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="topbar-title">My Profile</h1>
+        <p id="topbar-sub">View and manage your employee profile</p>
+      </div>
+      <div class="topbar-right">
+        <div class="tb-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <div class="tb-icon tb-dot" onclick="showScreen('notifications')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </div>
+        <div class="tb-avatar" onclick="showScreen('profile')">
+          <div class="av-circle">RK</div>
+          <div>
+            <div class="av-name">Rohith Kumar</div>
+            <div class="av-role">Senior Engineer</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ================= SCREEN 1: PROFILE ================= -->
+      <div class="screen active" id="screen-profile">
+        <div class="profile-grid">
+          <!-- Left Hero Card -->
+          <div class="profile-hero-card">
+            <div class="profile-avatar-lg">RK</div>
+            <h2 class="profile-name">Rohith Kumar</h2>
+            <div class="profile-role-tag">Senior Software Engineer</div>
+            <p class="profile-meta">Engineering Team &bull; Employee ID: <strong>DF-2024-0112</strong><br>Joined 12th Jan 2023</p>
+            <button class="btn btn-outline" style="width:100%; justify-content:center; margin-bottom: 20px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Edit Profile
+            </button>
+            <div class="profile-stats-row">
+              <div>
+                <div class="p-stat-val">3.2</div>
+                <div class="p-stat-lbl">Years Exp</div>
+              </div>
+              <div>
+                <div class="p-stat-val">12</div>
+                <div class="p-stat-lbl">Team Size</div>
+              </div>
+              <div>
+                <div class="p-stat-val">18</div>
+                <div class="p-stat-lbl">Leaves Left</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Details Stack -->
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div class="card">
+              <div class="card-hd">
+                <div>
+                  <div class="card-title">Personal Information</div>
+                  <div class="card-sub">Your personal contact and identification details</div>
+                </div>
+              </div>
+              <div class="info-group-grid">
+                <div class="info-item"><label>Full Name</label><div>Rohith Kumar Varma</div></div>
+                <div class="info-item"><label>Date of Birth</label><div>14 Aug 1996</div></div>
+                <div class="info-item"><label>Gender</label><div>Male</div></div>
+                <div class="info-item"><label>Phone Number</label><div>+91 98450 12345</div></div>
+                <div class="info-item"><label>Personal Email</label><div>rohith.varma@gmail.com</div></div>
+                <div class="info-item"><label>Current Address</label><div>Bengaluru, Karnataka, India</div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hd">
+                <div>
+                  <div class="card-title">Work Information</div>
+                  <div class="card-sub">Job role, reporting hierarchy &amp; department details</div>
+                </div>
+              </div>
+              <div class="info-group-grid">
+                <div class="info-item"><label>Department</label><div>Product Engineering</div></div>
+                <div class="info-item"><label>Designation</label><div>Senior Software Engineer</div></div>
+                <div class="info-item"><label>Reporting Manager</label><div>Priya Sharma (VP Engg)</div></div>
+                <div class="info-item"><label>Work Email</label><div>rohith.kumar@dayflow.io</div></div>
+                <div class="info-item"><label>Work Location</label><div>Bengaluru HQ (Hybrid)</div></div>
+                <div class="info-item"><label>Employment Type</label><div>Full-time Permanent</div></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-hd">
+                <div>
+                  <div class="card-title">Official Documents</div>
+                  <div class="card-sub">Verified identity and employment records</div>
+                </div>
+              </div>
+              <div class="doc-row">
+                <div class="doc-left">
+                  <div class="doc-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div><strong style="font-size:13px;">Employment Contract.pdf</strong><div style="font-size:11px; color:var(--ink-faint);">Uploaded Jan 2023 &bull; 1.4 MB</div></div>
+                </div>
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:11.5px;">Download</button>
+              </div>
+              <div class="doc-row">
+                <div class="doc-left">
+                  <div class="doc-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                  <div><strong style="font-size:13px;">National ID / PAN Card.pdf</strong><div style="font-size:11px; color:var(--ink-faint);">Verified &bull; 850 KB</div></div>
+                </div>
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:11.5px;">Download</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 2: ATTENDANCE ================= -->
+      <div class="screen" id="screen-attendance">
+        <div class="att-stats">
+          <div class="att-stat-card featured">
+            <div style="font-size:12px; opacity:.8; margin-bottom:4px;">Present This Month</div>
+            <div class="display" style="font-size:32px; font-weight:700;">21 Days</div>
+            <div style="font-size:11.5px; opacity:.7; margin-top:4px;">95.4% Attendance Rate</div>
+          </div>
+          <div class="att-stat-card">
+            <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">Late Check-ins</div>
+            <div class="display" style="font-size:32px; font-weight:700; color:var(--gold);">2 Days</div>
+            <div style="font-size:11.5px; color:var(--ink-faint); margin-top:4px;">Grace period applied</div>
+          </div>
+          <div class="att-stat-card">
+            <div style="font-size:12px; color:var(--ink-soft); margin-bottom:4px;">Approved Leaves</div>
+            <div class="display" style="font-size:32px; font-weight:700; color:var(--rose);">1 Day</div>
+            <div style="font-size:11.5px; color:var(--ink-faint); margin-top:4px;">Casual Leave</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">August 2026 Calendar</div>
+              <div class="card-sub">Daily check-in and shift record</div>
+            </div>
+            <div style="display:flex; gap:12px; font-size:11.5px;">
+              <span style="display:flex; align-items:center; gap:5px;"><span class="cal-dot" style="background:var(--success);"></span> Present</span>
+              <span style="display:flex; align-items:center; gap:5px;"><span class="cal-dot" style="background:var(--gold);"></span> Late</span>
+              <span style="display:flex; align-items:center; gap:5px;"><span class="cal-dot" style="background:var(--rose);"></span> Leave</span>
+            </div>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-day-name">MON</div><div class="cal-day-name">TUE</div><div class="cal-day-name">WED</div><div class="cal-day-name">THU</div><div class="cal-day-name">FRI</div><div class="cal-day-name">SAT</div><div class="cal-day-name">SUN</div>
+            <!-- Days -->
+            <div class="cal-cell"><span>1</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>2</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>3</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>4</span><span class="cal-dot" style="background:var(--gold);"></span></div>
+            <div class="cal-cell"><span>5</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>6</span><span>Off</span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>7</span><span>Off</span></div>
+            <div class="cal-cell"><span>8</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>9</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>10</span><span class="cal-dot" style="background:var(--rose);"></span></div>
+            <div class="cal-cell"><span>11</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>12</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>13</span><span>Off</span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>14</span><span>Off</span></div>
+            <div class="cal-cell"><span>15</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>16</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>17</span><span class="cal-dot" style="background:var(--gold);"></span></div>
+            <div class="cal-cell"><span>18</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>19</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>20</span><span>Off</span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>21</span><span>Off</span></div>
+            <div class="cal-cell today"><span>22</span><span class="cal-dot" style="background:var(--success);"></span></div>
+            <div class="cal-cell"><span>23</span><span>-</span></div>
+            <div class="cal-cell"><span>24</span><span>-</span></div>
+            <div class="cal-cell"><span>25</span><span>-</span></div>
+            <div class="cal-cell"><span>26</span><span>-</span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>27</span><span>-</span></div>
+            <div class="cal-cell" style="opacity:.4;"><span>28</span><span>-</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">Recent Activity Logs</div>
+            <button class="btn btn-outline" style="padding:6px 14px; font-size:11.5px;">Export Log</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Effective Hours</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>22 Aug 2026</td><td class="mono">09:03 AM</td><td class="mono">06:05 PM</td><td class="mono">9h 02m</td><td><span class="status-pill pill-present">Present</span></td></tr>
+              <tr><td>21 Aug 2026</td><td class="mono">09:47 AM</td><td class="mono">06:30 PM</td><td class="mono">8h 43m</td><td><span class="status-pill pill-late">Late (47m)</span></td></tr>
+              <tr><td>20 Aug 2026</td><td class="mono">08:58 AM</td><td class="mono">06:02 PM</td><td class="mono">9h 04m</td><td><span class="status-pill pill-present">Present</span></td></tr>
+              <tr><td>19 Aug 2026</td><td class="mono">09:05 AM</td><td class="mono">06:12 PM</td><td class="mono">9h 07m</td><td><span class="status-pill pill-present">Present</span></td></tr>
+              <tr><td>18 Aug 2026</td><td class="mono">—</td><td class="mono">—</td><td class="mono">0h 00m</td><td><span class="status-pill pill-leave">Casual Leave</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 3: APPLY LEAVE ================= -->
+      <div class="screen" id="screen-leave-apply">
+        <div class="leave-grid">
+          <div>
+            <h3 class="display" style="font-size:18px; margin-bottom:14px;">Leave Balance</h3>
+            <div class="balance-card" style="background:var(--wine-dark); color:#fff;">
+              <div><div style="font-size:12px; opacity:.75;">Annual / Earned</div><div class="display" style="font-size:24px; font-weight:700;">14.0</div></div>
+              <span class="badge" style="background:rgba(255,255,255,0.15); color:#fff;">Days</span>
+            </div>
+            <div class="balance-card" style="background:var(--rose-light); color:var(--rose-dark);">
+              <div><div style="font-size:12px;">Casual Leave</div><div class="display" style="font-size:24px; font-weight:700;">3.0</div></div>
+              <span class="badge badge-rose">Days</span>
+            </div>
+            <div class="balance-card" style="background:var(--gold-light); color:var(--gold);">
+              <div><div style="font-size:12px;">Sick Leave</div><div class="display" style="font-size:24px; font-weight:700;">5.5</div></div>
+              <span class="badge badge-warning">Days</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-hd">
+              <div>
+                <div class="card-title">New Leave Request</div>
+                <div class="card-sub">Submit your time-off request for manager approval</div>
+              </div>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Leave request submitted successfully!');">
+              <div class="field">
+                <label>Leave Category</label>
+                <div class="input-wrap">
+                  <select required>
+                    <option value="">Select category...</option>
+                    <option value="annual">Annual / Vacation Leave</option>
+                    <option value="casual">Casual Leave</option>
+                    <option value="sick">Sick Leave</option>
+                    <option value="comp">Compensatory Off</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="field">
+                  <label>From Date</label>
+                  <div class="input-wrap"><input type="date" required value="2026-08-25"/></div>
+                </div>
+                <div class="field">
+                  <label>To Date</label>
+                  <div class="input-wrap"><input type="date" required value="2026-08-26"/></div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Reason for Leave</label>
+                <div class="input-wrap">
+                  <textarea placeholder="Please describe the reason for your time-off..." required></textarea>
+                </div>
+              </div>
+              <div class="field">
+                <label>Optional Supporting Document</label>
+                <div class="upload-area">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <div>Click to upload or drag medical certificate / document</div>
+                </div>
+              </div>
+              <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+                <button type="button" class="btn btn-outline" onclick="showScreen('leave-history')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 4: LEAVE HISTORY ================= -->
+      <div class="screen" id="screen-leave-history">
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">Leave History &amp; Requests</div>
+              <div class="card-sub">Overview of all past and current leave applications</div>
+            </div>
+            <button class="btn btn-primary" onclick="showScreen('leave-apply')">+ Apply Leave</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Leave Type</th><th>Duration</th><th>Days</th><th>Reason</th><th>Applied On</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Annual Leave</strong></td>
+                <td>25 Aug 2026 – 26 Aug 2026</td>
+                <td class="mono">2.0</td>
+                <td style="color:var(--ink-soft);">Family wedding out of town</td>
+                <td>22 Aug 2026</td>
+                <td><span class="status-pill pill-pending">Pending Review</span></td>
+                <td><button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="alert('Cancelled')">Cancel</button></td>
+              </tr>
+              <tr>
+                <td><strong>Casual Leave</strong></td>
+                <td>10 Aug 2026</td>
+                <td class="mono">1.0</td>
+                <td style="color:var(--ink-soft);">Personal errand &amp; bank work</td>
+                <td>08 Aug 2026</td>
+                <td><span class="status-pill pill-present">Approved</span></td>
+                <td><span style="color:var(--ink-faint); font-size:11px;">—</span></td>
+              </tr>
+              <tr>
+                <td><strong>Sick Leave</strong></td>
+                <td>14 Jul 2026 – 15 Jul 2026</td>
+                <td class="mono">2.0</td>
+                <td style="color:var(--ink-soft);">Viral fever &amp; doctor consultation</td>
+                <td>14 Jul 2026</td>
+                <td><span class="status-pill pill-present">Approved</span></td>
+                <td><span style="color:var(--ink-faint); font-size:11px;">—</span></td>
+              </tr>
+              <tr>
+                <td><strong>Casual Leave</strong></td>
+                <td>02 Jun 2026</td>
+                <td class="mono">1.0</td>
+                <td style="color:var(--ink-soft);">Short notice leave</td>
+                <td>02 Jun 2026</td>
+                <td><span class="status-pill pill-absent">Rejected</span></td>
+                <td><span style="color:var(--ink-faint); font-size:11px;">—</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 5: SALARY / PAYROLL ================= -->
+      <div class="screen" id="screen-salary">
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:20px;">
+          <div class="card" style="background:linear-gradient(135deg, var(--wine-dark) 0%, var(--wine) 100%); color:#fff; border-color:transparent;">
+            <div style="font-size:12px; opacity:.8;">Net Disbursed (July 2026)</div>
+            <div class="display" style="font-size:30px; font-weight:700; margin:4px 0;">₹72,400</div>
+            <div style="font-size:11px; opacity:.7;">Credited on 31st July &bull; HDFC Bank</div>
+          </div>
+          <div class="card">
+            <div style="font-size:12px; color:var(--ink-soft);">Total Gross Earnings</div>
+            <div class="display" style="font-size:30px; font-weight:700; color:var(--wine-mid); margin:4px 0;">₹85,000</div>
+            <div style="font-size:11px; color:var(--ink-faint);">Basic + HRA + Allowances</div>
+          </div>
+          <div class="card">
+            <div style="font-size:12px; color:var(--ink-soft);">Total Deductions</div>
+            <div class="display" style="font-size:30px; font-weight:700; color:var(--danger); margin:4px 0;">₹12,600</div>
+            <div style="font-size:11px; color:var(--ink-faint);">PF, Professional Tax, TDS</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">July 2026 Payslip Breakdown</div>
+              <div class="card-sub">Detailed breakdown of allowances and tax statutory withholdings</div>
+            </div>
+            <button class="btn btn-primary" onclick="alert('Downloading Payslip PDF...')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF Slip
+            </button>
+          </div>
+
+          <div class="salary-breakdown">
+            <!-- Earnings -->
+            <div style="background:var(--canvas); padding:16px; border-radius:12px;">
+              <h4 style="font-size:13px; font-weight:700; color:var(--wine); margin-bottom:12px; text-transform:uppercase; letter-spacing:.05em;">Earnings</h4>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;"><span>Basic Salary</span><strong class="mono">₹45,000.00</strong></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;"><span>House Rent Allowance (HRA)</span><strong class="mono">₹22,500.00</strong></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;"><span>Special Allowance</span><strong class="mono">₹12,500.00</strong></div>
+              <div style="display:flex; justify-content:space-between; font-size:13px;"><span>Internet &amp; Phone Reimbursement</span><strong class="mono">₹5,000.00</strong></div>
+            </div>
+
+            <!-- Deductions -->
+            <div style="background:var(--canvas); padding:16px; border-radius:12px;">
+              <h4 style="font-size:13px; font-weight:700; color:var(--danger); margin-bottom:12px; text-transform:uppercase; letter-spacing:.05em;">Deductions</h4>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;"><span>Provident Fund (Employee PF)</span><strong class="mono">₹5,400.00</strong></div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;"><span>Income Tax / TDS</span><strong class="mono">₹7,000.00</strong></div>
+              <div style="display:flex; justify-content:space-between; font-size:13px;"><span>Professional Tax (PT)</span><strong class="mono">₹200.00</strong></div>
+            </div>
+          </div>
+
+          <div class="pay-total-row">
+            <div>
+              <div style="font-size:12px; opacity:.8;">Net Take Home Pay</div>
+              <div class="display" style="font-size:26px; font-weight:700;">₹72,400.00</div>
+            </div>
+            <span class="badge" style="background:var(--success); color:#fff;">Status: Paid</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SCREEN 6: NOTIFICATIONS ================= -->
+      <div class="screen" id="screen-notifications">
+        <div class="card">
+          <div class="card-hd">
+            <div>
+              <div class="card-title">Activity &amp; System Notifications</div>
+              <div class="card-sub">Stay up to date with approvals, policies, and company announcements</div>
+            </div>
+            <button class="btn btn-outline" style="font-size:11.5px; padding:6px 14px;" onclick="markAllRead()">Mark all as read</button>
+          </div>
+
+          <div class="notif-tabs">
+            <button class="tab-btn active">All</button>
+            <button class="tab-btn">Leave</button>
+            <button class="tab-btn">Payroll</button>
+            <button class="tab-btn">Company</button>
+          </div>
+
+          <div class="notif-item unread">
+            <div class="notif-icon-circle" style="background:var(--success-light); color:var(--success);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex; justify-content:space-between;">
+                <strong style="font-size:13.5px;">Leave Approved by Manager</strong>
+                <span style="font-size:11px; color:var(--ink-faint);">2 hours ago</span>
+              </div>
+              <p style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Your Casual Leave application for 10th August has been approved by Priya Sharma.</p>
+            </div>
+          </div>
+
+          <div class="notif-item unread">
+            <div class="notif-icon-circle" style="background:var(--gold-light); color:var(--gold);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex; justify-content:space-between;">
+                <strong style="font-size:13.5px;">Salary Credited — July 2026</strong>
+                <span style="font-size:11px; color:var(--ink-faint);">3 days ago</span>
+              </div>
+              <p style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Your salary for the month of July 2026 (₹72,400) has been processed and credited to your registered bank account.</p>
+            </div>
+          </div>
+
+          <div class="notif-item">
+            <div class="notif-icon-circle" style="background:var(--rose-light); color:var(--rose);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex; justify-content:space-between;">
+                <strong style="font-size:13.5px;">Independence Day Holiday Reminder</strong>
+                <span style="font-size:11px; color:var(--ink-faint);">15 Aug 2026</span>
+              </div>
+              <p style="font-size:12.5px; color:var(--ink-soft); margin-top:2px;">Dayflow offices will remain closed on 15th August in observance of Independence Day.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const pageTitles = {
+  'profile': { title: 'My Profile', sub: 'View and manage your employee profile' },
+  'attendance': { title: 'My Attendance', sub: 'Track your daily check-in, hours and monthly calendar' },
+  'leave-apply': { title: 'Apply for Leave', sub: 'Submit new time-off requests with ease' },
+  'leave-history': { title: 'Leave History', sub: 'Track past leave applications and approval statuses' },
+  'salary': { title: 'Salary & Payroll', sub: 'View salary slips, earnings, deductions and statutory details' },
+  'notifications': { title: 'Notifications', sub: 'Company updates, approval notices & alerts' }
+};
+
+function showScreen(screenId, navEl) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + screenId);
+  if (target) target.classList.add('active');
+
+  if (navEl) {
+    document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+    navEl.classList.add('active');
+  }
+
+  if (pageTitles[screenId]) {
+    document.getElementById('topbar-title').textContent = pageTitles[screenId].title;
+    document.getElementById('topbar-sub').textContent = pageTitles[screenId].sub;
+  }
+}
+
+function markAllRead() {
+  document.querySelectorAll('.notif-item').forEach(item => item.classList.remove('unread'));
+  const badge = document.querySelector('.sb-badge');
+  if (badge) badge.style.display = 'none';
+}
+</script>
+</body>
+</html>
