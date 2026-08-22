@@ -21,7 +21,11 @@ function App() {
     return (
       <EmployeeLayout
         currentUser={currentUser}
-        onSwitchToAdmin={() => setViewMode('admin')}
+        onSwitchToAdmin={() => {
+          if (currentUser?.role === 'admin' || currentUser?.id === 'ADMIN001') {
+            setViewMode('admin');
+          }
+        }}
         onLogout={() => setViewMode('auth')}
       />
     );

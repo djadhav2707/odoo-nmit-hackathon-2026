@@ -22,6 +22,7 @@ export function EmployeeLayout({ currentUser, onSwitchToAdmin, onLogout }) {
       <EmployeeSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        currentUser={currentUser}
         onSwitchToAdmin={onSwitchToAdmin}
       />
 
