@@ -284,6 +284,20 @@ app.get("/api/admin/payroll", (req, res) => {
   res.json(mockPayroll);
 });
 
+// Serve frontend build if available (Fullstack Single-Service Deployment)
+const path = require("path");
+const frontendDist = path.join(__dirname, "../frontend/dist");
+app.use(express.static(frontendDist));
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api") || req.path.startsWith("/employees")) {
+    return next();
+  }
+  const indexPath = path.join(frontendDist, "index.html");
+  res.sendFile(indexPath, (err) => {
+    if (err) next();
+  });
+});
+
 // Start listening
 app.listen(PORT, () => {
   console.log(`DayFlow Server running on http://localhost:${PORT}`);
