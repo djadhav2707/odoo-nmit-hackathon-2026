@@ -16,7 +16,7 @@ import Reports from '../../pages/admin/Reports';
 // Service & Data
 import { apiService } from '../../services/api';
 
-export function AdminLayout({ onSwitchToEmployee, onLogout }) {
+export function AdminLayout({ currentUser, onSwitchToEmployee, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [toast, setToast] = useState({ message: '', type: 'info' });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -98,7 +98,9 @@ export function AdminLayout({ onSwitchToEmployee, onLogout }) {
       <div className="main">
         <AdminTopbar
           activeTab={activeTab}
+          currentUser={currentUser}
           setActiveTab={setActiveTab}
+          onLogout={onLogout}
         />
 
         <main className="content">
@@ -150,9 +152,7 @@ export function AdminLayout({ onSwitchToEmployee, onLogout }) {
           )}
 
           {activeTab === 'reports' && (
-            <Reports
-              onShowToast={showToast}
-            />
+            <Reports onShowToast={showToast} />
           )}
         </main>
       </div>

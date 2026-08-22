@@ -8,7 +8,7 @@ import EmployeeAttendance from '../../pages/employee/EmployeeAttendance';
 import EmployeeLeaves from '../../pages/employee/EmployeeLeaves';
 import EmployeePayslips from '../../pages/employee/EmployeePayslips';
 
-export function EmployeeLayout({ onSwitchToAdmin, onLogout }) {
+export function EmployeeLayout({ currentUser, onSwitchToAdmin, onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [toast, setToast] = useState({ message: '', type: 'info' });
 
@@ -28,24 +28,25 @@ export function EmployeeLayout({ onSwitchToAdmin, onLogout }) {
       <div className="main">
         <EmployeeTopbar
           activeTab={activeTab}
+          currentUser={currentUser}
           onLogout={onLogout}
         />
 
         <main className="content">
           {activeTab === 'dashboard' && (
-            <EmployeeDashboard onShowToast={showToast} />
+            <EmployeeDashboard currentUser={currentUser} onShowToast={showToast} />
           )}
 
           {activeTab === 'attendance' && (
-            <EmployeeAttendance />
+            <EmployeeAttendance currentUser={currentUser} />
           )}
 
           {activeTab === 'leaves' && (
-            <EmployeeLeaves onShowToast={showToast} />
+            <EmployeeLeaves currentUser={currentUser} onShowToast={showToast} />
           )}
 
           {activeTab === 'payslips' && (
-            <EmployeePayslips onShowToast={showToast} />
+            <EmployeePayslips currentUser={currentUser} onShowToast={showToast} />
           )}
         </main>
       </div>
