@@ -5,8 +5,8 @@ import AuthScreen from './components/auth/AuthScreen';
 import './admin.css';
 
 function App() {
-  const [viewMode, setViewMode] = useState('admin'); // 'auth' | 'admin' | 'employee'
-  const [currentUser, setCurrentUser] = useState({ name: 'Priya Sharma', role: 'admin' });
+  const [viewMode, setViewMode] = useState('auth'); // Starts at Login screen: 'auth' | 'admin' | 'employee'
+  const [currentUser, setCurrentUser] = useState(null);
 
   const handleLogin = (user) => {
     setCurrentUser(user);
@@ -20,6 +20,7 @@ function App() {
   if (viewMode === 'employee') {
     return (
       <EmployeeLayout
+        currentUser={currentUser}
         onSwitchToAdmin={() => setViewMode('admin')}
         onLogout={() => setViewMode('auth')}
       />
@@ -28,6 +29,7 @@ function App() {
 
   return (
     <AdminLayout
+      currentUser={currentUser}
       onSwitchToEmployee={() => setViewMode('employee')}
       onLogout={() => setViewMode('auth')}
     />
