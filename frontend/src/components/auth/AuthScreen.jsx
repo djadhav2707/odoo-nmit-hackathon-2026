@@ -10,6 +10,7 @@ export function AuthScreen({ onLogin }) {
   const [department, setDepartment] = useState('Engineering');
   const [designation, setDesignation] = useState('Software Engineer');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   // Forgot password flow states
@@ -17,21 +18,24 @@ export function AuthScreen({ onLogin }) {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [otpTimer, setOtpTimer] = useState(120);
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
+    setErrorMessage('');
     if (authMode === 'signin') {
       if (selectedRole === 'admin') {
-        setEmail('priya.s@dayflow.hr');
+        setEmail('ADMIN001');
+        setPassword('Admin@001');
       } else {
         setEmail('rohith.k@dayflow.hr');
+        setPassword('••••••••');
       }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
     setLoading(true);
 
     try {
@@ -39,9 +43,9 @@ export function AuthScreen({ onLogin }) {
         const newEmpData = {
           name: name.trim() || 'New Employee',
           email: email.trim(),
-          role: role === 'admin' ? 'ADMIN' : 'EMPLOYEE',
+          role: 'EMPLOYEE',
           department: department,
-          designation: designation || (role === 'admin' ? 'HR Administrator' : 'Software Engineer'),
+          designation: designation || 'Software Engineer',
           phone: '+91 98' + Math.floor(10000000 + Math.random() * 90000000),
           status: 'Active',
           joinDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
@@ -51,29 +55,74 @@ export function AuthScreen({ onLogin }) {
         };
 
         const created = await apiService.addEmployee(newEmpData);
-        setSuccessMessage(`Account created for ${created.name}! Redirecting...`);
+        setSuccessMessage(`Account registered for ${created.name}! Logging you in...`);
         
         setTimeout(() => {
           onLogin({
             id: created.id,
             email: created.email || email,
-            role: role,
+            role: 'employee',
             name: created.name || name,
             department: created.department,
             designation: created.designation
           });
         }, 600);
       } else {
-        const authRes = await apiService.login(email, password);
-        onLogin(authRes.user);
+        // Sign In Flow
+        const cleanUser = email.trim();
+
+        // Strict Admin verification
+        if (role === 'admin') {
+          const isCorrectAdminUser = cleanUser.toUpperCase() === 'ADMIN001' || cleanUser.toLowerCase() === 'admin@dayflow.io';
+          const isCorrectAdminPass = password === 'Admin@001';
+
+          if (!isCorrectAdminUser || !isCorrectAdminPass) {
+            setErrorMessage('Access Denied: Only user ADMIN001 with password Admin@001 can access the Admin Dashboard.');
+            setLoading(false);
+            return;
+          }
+
+          onLogin({
+            id: 'ADMIN001',
+            name: 'Priya Sharma (ADMIN001)',
+            email: 'admin@dayflow.io',
+            role: 'admin',
+            department: 'Human Resources',
+            designation: 'HR Administrator'
+          });
+          return;
+        }
+
+        // Employee Login
+        const authRes = await apiService.login(cleanUser, password);
+        onLogin({
+          ...authRes.user,
+          role: 'employee',
+          name: cleanUser.includes('rohith') ? 'Rohith Kumar' : (name || cleanUser.split('@')[0])
+        });
       }
     } catch (err) {
       console.error('Auth error:', err);
-      onLogin({
-        email,
-        role,
-        name: name || (role === 'admin' ? 'Priya Sharma' : 'Rohith Kumar')
-      });
+      if (role === 'admin') {
+        if (email.trim().toUpperCase() === 'ADMIN001' && password === 'Admin@001') {
+          onLogin({
+            id: 'ADMIN001',
+            name: 'Priya Sharma (ADMIN001)',
+            email: 'admin@dayflow.io',
+            role: 'admin',
+            department: 'Human Resources',
+            designation: 'HR Administrator'
+          });
+        } else {
+          setErrorMessage('Access Denied: Only user ADMIN001 with password Admin@001 can access the Admin Dashboard.');
+        }
+      } else {
+        onLogin({
+          email,
+          role: 'employee',
+          name: name || 'Rohith Kumar'
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -87,7 +136,7 @@ export function AuthScreen({ onLogin }) {
     setTimeout(() => {
       setLoading(false);
       setAuthMode('otp');
-    }, 600);
+    }, 500);
   };
 
   const handleVerifyOtp = (e) => {
@@ -96,7 +145,7 @@ export function AuthScreen({ onLogin }) {
     setTimeout(() => {
       setLoading(false);
       setAuthMode('reset');
-    }, 600);
+    }, 500);
   };
 
   const handleResetPassword = (e) => {
@@ -109,7 +158,7 @@ export function AuthScreen({ onLogin }) {
     setTimeout(() => {
       setLoading(false);
       setAuthMode('reset-success');
-    }, 600);
+    }, 500);
   };
 
   const handleOtpChange = (index, value) => {
@@ -118,7 +167,6 @@ export function AuthScreen({ onLogin }) {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (value && index < 5) {
       const nextInput = document.getElementById(`otp-input-${index + 1}`);
       nextInput?.focus();
@@ -191,11 +239,11 @@ export function AuthScreen({ onLogin }) {
             <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-                Secure 256-bit Encrypted Session
+                Strict Role Authentication (ADMIN001 Only)
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'rgba(255,255,255,0.7)' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-                Role-Based Portal Access (Admin &amp; Employee)
+                Secure Employee &amp; Admin Workspaces
               </div>
             </div>
           </div>
@@ -217,7 +265,7 @@ export function AuthScreen({ onLogin }) {
                   <div style={{ display: 'flex', background: 'var(--canvas)', borderRadius: '100px', padding: '4px', marginBottom: '16px', border: '1px solid var(--border)' }}>
                     <button
                       type="button"
-                      onClick={() => { setAuthMode('signin'); setSuccessMessage(''); }}
+                      onClick={() => { setAuthMode('signin'); setErrorMessage(''); setSuccessMessage(''); }}
                       style={{
                         flex: 1,
                         border: 'none',
@@ -235,7 +283,7 @@ export function AuthScreen({ onLogin }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setAuthMode('signup'); setSuccessMessage(''); }}
+                      onClick={() => { setAuthMode('signup'); setRole('employee'); setErrorMessage(''); setSuccessMessage(''); }}
                       style={{
                         flex: 1,
                         border: 'none',
@@ -253,48 +301,56 @@ export function AuthScreen({ onLogin }) {
                     </button>
                   </div>
 
-                  {/* DEMO ROLE SWITCHER */}
-                  <div style={{ marginBottom: '14px', padding: '8px 10px', background: 'var(--blush)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                    <label style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--wine-mid)', display: 'block', marginBottom: '5px' }}>
-                      {authMode === 'signup' ? 'Register As Role:' : 'Quick Demo Role:'}
-                    </label>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        type="button"
-                        onClick={() => handleRoleSelect('admin')}
-                        style={{
-                          flex: 1,
-                          border: 'none',
-                          borderRadius: '8px',
-                          padding: '6px 0',
-                          fontSize: '11.5px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          background: role === 'admin' ? 'var(--wine)' : '#fff',
-                          color: role === 'admin' ? '#fff' : 'var(--ink)'
-                        }}
-                      >
-                        HR Admin
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRoleSelect('employee')}
-                        style={{
-                          flex: 1,
-                          border: 'none',
-                          borderRadius: '8px',
-                          padding: '6px 0',
-                          fontSize: '11.5px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          background: role === 'employee' ? 'var(--rose)' : '#fff',
-                          color: role === 'employee' ? '#fff' : 'var(--ink)'
-                        }}
-                      >
-                        Employee
-                      </button>
+                  {/* PORTAL SELECTOR */}
+                  {authMode === 'signin' && (
+                    <div style={{ marginBottom: '14px', padding: '8px 10px', background: 'var(--blush)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                      <label style={{ fontSize: '10.5px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--wine-mid)', display: 'block', marginBottom: '5px' }}>
+                        Select Portal Access:
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleRoleSelect('admin')}
+                          style={{
+                            flex: 1,
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '6px 0',
+                            fontSize: '11.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            background: role === 'admin' ? 'var(--wine)' : '#fff',
+                            color: role === 'admin' ? '#fff' : 'var(--ink)'
+                          }}
+                        >
+                          HR Admin (ADMIN001)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRoleSelect('employee')}
+                          style={{
+                            flex: 1,
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '6px 0',
+                            fontSize: '11.5px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            background: role === 'employee' ? 'var(--rose)' : '#fff',
+                            color: role === 'employee' ? '#fff' : 'var(--ink)'
+                          }}
+                        >
+                          Employee
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {errorMessage && (
+                    <div style={{ padding: '9px 12px', background: 'var(--danger-light)', color: 'var(--danger)', borderRadius: '8px', fontSize: '11.5px', fontWeight: 600, marginBottom: '12px', border: '1px solid rgba(214,72,63,0.25)', lineHeight: 1.4 }}>
+                      ⚠️ {errorMessage}
+                    </div>
+                  )}
 
                   {successMessage && (
                     <div style={{ padding: '8px 12px', background: 'var(--success-light)', color: 'var(--success)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, marginBottom: '12px', textAlign: 'center' }}>
@@ -348,10 +404,13 @@ export function AuthScreen({ onLogin }) {
                     )}
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '3px' }}>Work Email</label>
+                      <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, marginBottom: '3px' }}>
+                        {role === 'admin' && authMode === 'signin' ? 'Admin ID / Username' : 'Work Email'}
+                      </label>
                       <input
-                        type="email"
+                        type="text"
                         value={email}
+                        placeholder={role === 'admin' ? 'ADMIN001' : 'you@dayflow.io'}
                         onChange={(e) => setEmail(e.target.value)}
                         style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1.5px solid var(--border)', outline: 'none', fontSize: '13px' }}
                         required
@@ -386,7 +445,7 @@ export function AuthScreen({ onLogin }) {
                       className="btn btn-primary"
                       style={{ width: '100%', justifyContent: 'center', marginTop: '6px', padding: '11px', opacity: loading ? 0.7 : 1 }}
                     >
-                      {loading ? 'Processing...' : (authMode === 'signin' ? `Sign In to ${role === 'admin' ? 'Admin Portal' : 'Employee Portal'}` : 'Register & Add to Employees')}
+                      {loading ? 'Verifying...' : (authMode === 'signin' ? (role === 'admin' ? 'Sign In as ADMIN001' : 'Sign In to Employee Portal') : 'Register & Join')}
                     </button>
                   </form>
                 </>

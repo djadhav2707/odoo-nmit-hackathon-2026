@@ -72,22 +72,45 @@ app.post("/api/auth/login", (req, res) => {
   const { email, password } = req.body;
   
   if (!email) {
-    return res.status(400).json({ message: "Email is required" });
+    return res.status(400).json({ message: "Username / Email is required" });
   }
 
-  // Check admin vs employee
-  const isAdmin = email.toLowerCase().includes("admin") || email.toLowerCase().includes("priya");
-  const user = {
-    name: isAdmin ? "Priya Sharma" : "Rohith Kumar",
-    email: email,
-    role: isAdmin ? "admin" : "employee",
-    department: isAdmin ? "HR" : "Engineering",
-    token: "mock-jwt-token-" + Date.now()
-  };
+  const cleanUser = String(email).trim();
+  const isAdminAttempt = cleanUser.toUpperCase() === "ADMIN001" || cleanUser.toLowerCase() === "admin@dayflow.io";
+
+  if (isAdminAttempt) {
+    if (password !== "Admin@001") {
+      return res.status(401).json({
+        message: "Invalid admin credentials. Only user ADMIN001 with password Admin@001 can access the Admin Dashboard."
+      });
+    }
+    return res.json({
+      message: "Admin login successful",
+      user: {
+        id: "ADMIN001",
+        name: "Priya Sharma (ADMIN001)",
+        email: "admin@dayflow.io",
+        role: "admin",
+        department: "Human Resources",
+        token: "admin-jwt-token-" + Date.now()
+      }
+    });
+  }
+
+  // Employee Login
+  const emp = mockEmployees.find(e => e.email.toLowerCase() === cleanUser.toLowerCase() || e.id.toLowerCase() === cleanUser.toLowerCase());
+  const empName = emp ? emp.name : (cleanUser.includes("@") ? cleanUser.split("@")[0] : cleanUser);
 
   res.json({
-    message: "Login successful",
-    user
+    message: "Employee login successful",
+    user: {
+      id: emp ? emp.id : "EMP-1001",
+      name: empName,
+      email: cleanUser,
+      role: "employee",
+      department: emp ? emp.department : "Engineering",
+      token: "emp-jwt-token-" + Date.now()
+    }
   });
 });
 
