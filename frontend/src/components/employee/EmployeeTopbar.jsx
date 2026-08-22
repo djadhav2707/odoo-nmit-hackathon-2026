@@ -1,13 +1,17 @@
 import React from 'react';
 
-const pageTitles = {
-  dashboard: { title: 'Employee Portal', sub: 'Welcome back, Rohith! Overview of your workspace' },
-  attendance: { title: 'Attendance & Punch Clock', sub: 'Log daily check-ins and inspect working hours' },
-  leaves: { title: 'Leave Requests & Balances', sub: 'Apply for time off and track approval status' },
-  payslips: { title: 'My Monthly Payslips', sub: 'View salary breakdowns and download tax receipts' }
-};
+export function EmployeeTopbar({ activeTab, currentUser, onLogout }) {
+  const userName = currentUser?.name || 'Rohith Kumar';
+  const userInitials = (userName || 'RK').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const userRole = currentUser?.designation || (currentUser?.role === 'admin' ? 'HR Administrator' : 'Senior Software Engineer');
 
-export function EmployeeTopbar({ activeTab, onLogout }) {
+  const pageTitles = {
+    dashboard: { title: 'Employee Portal', sub: `Welcome back, ${userName}! Overview of your workspace` },
+    attendance: { title: 'Attendance & Punch Clock', sub: 'Log daily check-ins and inspect working hours' },
+    leaves: { title: 'Leave Requests & Balances', sub: 'Apply for time off and track approval status' },
+    payslips: { title: 'My Monthly Payslips', sub: 'View salary breakdowns and download tax receipts' }
+  };
+
   const info = pageTitles[activeTab] || pageTitles.dashboard;
 
   return (
@@ -17,13 +21,13 @@ export function EmployeeTopbar({ activeTab, onLogout }) {
         <p>{info.sub}</p>
       </div>
       <div className="topbar-right">
-        <div className="tb-avatar" title="Sign Out" onClick={onLogout}>
-          <div className="av-circle">RK</div>
+        <div className="tb-avatar" title="Sign Out" onClick={onLogout} style={{ cursor: 'pointer' }}>
+          <div className="av-circle">{userInitials}</div>
           <div>
-            <div className="av-name">Rohith Kumar</div>
-            <div className="av-role">Senior Frontend Engineer</div>
+            <div className="av-name">{userName}</div>
+            <div className="av-role">{userRole}</div>
           </div>
-          <span style={{ fontSize: '11px', color: 'var(--rose)', marginLeft: '4px' }}>Logout</span>
+          <span style={{ fontSize: '11px', color: 'var(--rose)', marginLeft: '6px', fontWeight: 600 }}>Logout</span>
         </div>
       </div>
     </header>

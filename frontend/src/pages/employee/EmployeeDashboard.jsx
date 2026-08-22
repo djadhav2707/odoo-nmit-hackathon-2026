@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
-export function EmployeeDashboard({ onShowToast }) {
+export function EmployeeDashboard({ currentUser, onShowToast }) {
   const [isCheckedIn, setIsCheckedIn] = useState(true);
   const [checkInTime, setCheckInTime] = useState('09:02 AM');
+  const employeeName = currentUser?.name || 'Rohith Kumar';
 
   const handleToggleCheckIn = () => {
     if (isCheckedIn) {
@@ -18,6 +19,16 @@ export function EmployeeDashboard({ onShowToast }) {
 
   return (
     <div className="screen active">
+      {/* PERSONALIZED GREETING BANNER */}
+      <div style={{ marginBottom: '16px' }}>
+        <h1 className="display" style={{ fontSize: '24px', fontWeight: 600, color: 'var(--wine-dark)' }}>
+          Good Morning, {employeeName} 👋
+        </h1>
+        <p style={{ fontSize: '12.5px', color: 'var(--ink-soft)', marginTop: '2px' }}>
+          {currentUser?.designation || 'Software Engineer'} &bull; {currentUser?.department || 'Engineering'} &bull; Here is your daily workplace overview.
+        </p>
+      </div>
+
       {/* PUNCH CLOCK & QUICK STATS ROW */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '16px', marginBottom: '20px' }}>
         {/* PUNCH CARD */}
@@ -40,7 +51,7 @@ export function EmployeeDashboard({ onShowToast }) {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between', gap: '16px', marginTop: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginTop: '20px' }}>
             <div>
               <div style={{ fontSize: '11px', opacity: 0.7 }}>Effective Working Hours</div>
               <div className="mono display" style={{ fontSize: '28px', fontWeight: 700, color: '#fff' }}>

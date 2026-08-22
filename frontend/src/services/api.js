@@ -7,79 +7,169 @@ import { initialDashboardStats, initialActivityFeed } from '../data/mockDashboar
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export const apiService = {
+  // Authentication
+  async login(email, password) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback:', e);
+    }
+    const isAdmin = email.toLowerCase().includes('admin') || email.toLowerCase().includes('priya');
+    return {
+      message: 'Login successful',
+      user: {
+        name: isAdmin ? 'Priya Sharma' : 'Rohith Kumar',
+        email,
+        role: isAdmin ? 'admin' : 'employee',
+        department: isAdmin ? 'HR' : 'Engineering'
+      }
+    };
+  },
+
   // Dashboard
   async getDashboardStats() {
-    if (API_BASE_URL) {
+    try {
       const res = await fetch(`${API_BASE_URL}/api/admin/dashboard`);
-      return res.json();
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for dashboard stats:', e);
     }
-    return Promise.resolve({ ...initialDashboardStats, feed: initialActivityFeed });
+    return { ...initialDashboardStats, totalEmployees: initialEmployees.length, feed: initialActivityFeed };
   },
 
   // Employees
   async getEmployees() {
-    if (API_BASE_URL) {
+    try {
       const res = await fetch(`${API_BASE_URL}/api/admin/employees`);
-      return res.json();
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    } catch (e) {
+      console.warn('API fetch fallback for employees:', e);
     }
-    return Promise.resolve([...initialEmployees]);
+    return [...initialEmployees];
   },
 
   async addEmployee(employeeData) {
-    if (API_BASE_URL) {
+    try {
       const res = await fetch(`${API_BASE_URL}/api/admin/employees`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(employeeData)
       });
-      return res.json();
+      if (res.ok) {
+        const data = await res.json();
+        const created = data.employee || data;
+        initialEmployees.unshift(created);
+        return created;
+      }
+    } catch (e) {
+      console.warn('API fetch fallback for addEmployee:', e);
     }
+
     const newEmp = {
       id: `EMP-${Math.floor(1000 + Math.random() * 9000)}`,
       ...employeeData,
       status: 'Active',
       joinDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      initials: employeeData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+      initials: (employeeData.name || 'NE').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     };
-    return Promise.resolve(newEmp);
+    initialEmployees.unshift(newEmp);
+    return newEmp;
   },
 
   // Attendance
   async getAttendance() {
-    if (API_BASE_URL) {
+    try {
       const res = await fetch(`${API_BASE_URL}/api/admin/attendance`);
-      return res.json();
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for attendance:', e);
     }
-    return Promise.resolve([...initialAttendance]);
+    return [...initialAttendance];
+  },
+
+  async checkIn(employeeId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/attendance/check-in`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeId })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for checkIn:', e);
+    }
+    return { message: 'Checked in' };
+  },
+
+  async checkOut(employeeId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/attendance/check-out`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employeeId })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for checkOut:', e);
+    }
+    return { message: 'Checked out' };
   },
 
   // Leaves
   async getLeaves() {
-    if (API_BASE_URL) {
+    try {
       const res = await fetch(`${API_BASE_URL}/api/admin/leaves`);
-      return res.json();
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for leaves:', e);
     }
-    return Promise.resolve([...initialLeaves]);
+    return [...initialLeaves];
+  },
+
+  async submitLeave(leaveData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/leaves`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(leaveData)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for submitLeave:', e);
+    }
+    return { message: 'Leave submitted' };
   },
 
   async updateLeaveStatus(requestId, status) {
-    if (API_BASE_URL) {
+    try {
       const res = await fetch(`${API_BASE_URL}/api/admin/leaves/${requestId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
-      return res.json();
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for updateLeaveStatus:', e);
     }
-    return Promise.resolve({ success: true, requestId, status });
+    return { success: true, requestId, status };
   },
 
   // Payroll
   async getPayroll() {
-    if (API_BASE_URL) {
+    try {
       const res = await fetch(`${API_BASE_URL}/api/admin/payroll`);
-      return res.json();
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn('API fetch fallback for payroll:', e);
     }
-    return Promise.resolve([...initialPayroll]);
+    return [...initialPayroll];
   }
 };

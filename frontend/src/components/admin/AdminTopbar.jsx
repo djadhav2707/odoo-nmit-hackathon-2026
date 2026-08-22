@@ -10,7 +10,10 @@ const pageTitles = {
   reports: { title: 'Analytics & Reports', sub: 'Generate workforce, tax, and attendance compliance reports' }
 };
 
-export function AdminTopbar({ activeTab, setActiveTab }) {
+export function AdminTopbar({ activeTab, currentUser, setActiveTab, onLogout }) {
+  const adminName = currentUser?.name || 'Priya Sharma';
+  const adminInitials = (adminName || 'PS').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const adminRole = currentUser?.designation || 'HR Administrator';
   const info = pageTitles[activeTab] || pageTitles.dashboard;
 
   return (
@@ -20,23 +23,24 @@ export function AdminTopbar({ activeTab, setActiveTab }) {
         <p>{info.sub}</p>
       </div>
       <div className="topbar-right">
-        <div className="tb-icon" title="Search">
+        <div className="tb-icon" title="Search" onClick={() => setActiveTab('employees')} style={{ cursor: 'pointer' }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
           </svg>
         </div>
-        <div className="tb-icon" title="Notifications" onClick={() => setActiveTab('leave-approval')}>
+        <div className="tb-icon" title="Notifications" onClick={() => setActiveTab('leave-approval')} style={{ cursor: 'pointer' }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
           </svg>
         </div>
-        <div className="tb-avatar">
-          <div className="av-circle">PS</div>
+        <div className="tb-avatar" title="Sign Out" onClick={onLogout} style={{ cursor: 'pointer' }}>
+          <div className="av-circle">{adminInitials}</div>
           <div>
-            <div className="av-name">Priya Sharma</div>
-            <div className="av-role">HR Administrator</div>
+            <div className="av-name">{adminName}</div>
+            <div className="av-role">{adminRole}</div>
           </div>
+          <span style={{ fontSize: '11px', color: 'var(--rose)', marginLeft: '6px', fontWeight: 600 }}>Logout</span>
         </div>
       </div>
     </header>
