@@ -1,0 +1,37 @@
+import React, { useState } from 'react';
+import AdminLayout from './components/admin/AdminLayout';
+import EmployeeLayout from './components/employee/EmployeeLayout';
+import AuthScreen from './components/auth/AuthScreen';
+import './admin.css';
+
+function App() {
+  const [viewMode, setViewMode] = useState('admin'); // 'auth' | 'admin' | 'employee'
+  const [currentUser, setCurrentUser] = useState({ name: 'Priya Sharma', role: 'admin' });
+
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    setViewMode(user.role === 'admin' ? 'admin' : 'employee');
+  };
+
+  if (viewMode === 'auth') {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
+  if (viewMode === 'employee') {
+    return (
+      <EmployeeLayout
+        onSwitchToAdmin={() => setViewMode('admin')}
+        onLogout={() => setViewMode('auth')}
+      />
+    );
+  }
+
+  return (
+    <AdminLayout
+      onSwitchToEmployee={() => setViewMode('employee')}
+      onLogout={() => setViewMode('auth')}
+    />
+  );
+}
+
+export default App;
